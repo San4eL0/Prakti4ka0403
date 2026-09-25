@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная №1 — Основы синтаксиса</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .task {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            border-left: 4px solid #3498db;
+        }
+
+        .task h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .task p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            width: 100px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 10px 22px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        button:active { transform: translateY(0); }
+
+        #output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 80px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        #output .ok    { color: #2ecc71; }
+        #output .err   { color: #e74c3c; }
+        #output .info  { color: #f1c40f; }
+
+        .hint {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Лабораторная работа №1</h1>
+        <p class="subtitle">Основы синтаксиса и типы данных JavaScript</p>
+
+        <div class="info-box">
+            💡 <strong>Задания для самостоятельного выполнения.</strong>
+            Нажимайте на кнопки — результаты появятся в блоке ниже.
+            Также все результаты дублируются в <strong>консоль (F12)</strong>.
+        </div>
+
+        <!-- Задание 1 -->
+        <div class="task">
+            <h3>1️⃣ Калькулятор возраста</h3>
+            <p>Введите год рождения — узнаете свой возраст.</p>
+            <div class="flex">
+                <input type="number" id="birthYear" placeholder="Год" value="2000" min="1900" max="2100">
+                <button onclick="taskAgeCalculator()">Рассчитать возраст</button>
+            </div>
+        </div>
+
+        <!-- Задание 2 -->
+        <div class="task">
+            <h3>2️⃣ Таблица умножения на 5</h3>
+            <p>Вывести таблицу умножения на 5 (от 1 до 10).</p>
+            <div class="flex">
+                <input type="number" id="multTableNumber" placeholder="Число" value="5" style="width:80px;">
+                <button onclick="taskMultiplicationTable()">Показать таблицу</button>
+            </div>
+        </div>
+
+        <!-- Задание 3 -->
+        <div class="task">
+            <h3>3️⃣ Поиск максимума из трёх чисел</h3>
+            <p>Введите три числа — найдём максимальное через условия.</p>
+            <div class="flex">
+                <input type="number" id="num1" value="10" style="width:80px;">
+                <input type="number" id="num2" value="25" style="width:80px;">
+                <input type="number" id="num3" value="17" style="width:80px;">
+                <button onclick="taskFindMax()">Найти максимум</button>
+            </div>
+        </div>
+
+        <!-- Задание 4 -->
+        <div class="task">
+            <h3>4️⃣ Факториал числа N</h3>
+            <p>Вычислить факториал N! с помощью цикла.</p>
+            <div class="flex">
+                <input type="number" id="factorialN" placeholder="N" value="5" min="0" max="20" style="width:80px;">
+                <button onclick="taskFactorial()">Вычислить N!</button>
+            </div>
+        </div>
+
+        <!-- Демонстрация теории -->
+        <div class="task" style="border-left-color: #9b59b6;">
+            <h3>🔬 Демонстрация теории</h3>
+            <p>Показать примеры переменных, типов данных, операторов.</p>
+            <button onclick="demoTypes()" style="background:#9b59b6;">Типы данных</button>
+            <button onclick="demoOperators()" style="background:#9b59b6;">Операторы</button>
+            <button onclick="demoConditions()" style="background:#9b59b6;">Условия</button>
+            <button onclick="demoLoops()" style="background:#9b59b6;">Циклы</button>
+        </div>
+
+        <!-- Вывод -->
+        <div id="output">👋 Нажмите на любую кнопку для вывода результата...</div>
+
+        <p class="hint">Откройте консоль (F12) — там тоже будут все результаты</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+<!--
+let birthYear = prompt("Введите год рождения:", 2000);
+let currentYear = new Date().getFullYear();
+let age = currentYear - birthYear;
+alert("Вам " + age + " лет!");
+
+
+
+for (let i = 1; i <= 10; i++) {
+    console.log("5 × " + i + " = " + (5 * i));
+}
+
+
+
+let a = 15, b = 42, c = 27;
+let max;
+
+if (a >= b && a >= c) {
+    max = a;
+} else if (b >= a && b >= c) {
+    max = b;
+} else {
+    max = c;
+}
+
+console.log("Максимальное число: " + max);
+
+
+
+let N = 5;
+let factorial = 1;
+
+for (let i = 1; i <= N; i++) {
+    factorial = factorial * i;
+}
+
+console.log(N + "! = " + factorial); // 5! = 120 

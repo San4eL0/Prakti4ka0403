@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер задач</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-section input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-section input[type="text"]:focus,
+        .input-section input[type="date"]:focus,
+        .input-section select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-section input[type="date"],
+        .input-section select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .input-section button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .input-section button:hover {
+            background: #5a67d8;
+            transform: scale(1.02);
+        }
+
+        .options-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .options-row label {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters button {
+            padding: 6px 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .filters button:hover {
+            border-color: #667eea;
+        }
+
+        .filters button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        #taskList {
+            list-style: none;
+        }
+
+        #taskList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #taskList li:hover {
+            background: #f0f1f3;
+        }
+
+        #taskList li.completed {
+            border-left-color: #28a745;
+            opacity: 0.7;
+        }
+
+        #taskList li.completed .task-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        /* ЗАДАНИЕ 3: приоритеты */
+        #taskList li.priority-high {
+            border-left-color: #dc3545;
+        }
+        #taskList li.priority-medium {
+            border-left-color: #ffc107;
+        }
+        #taskList li.priority-low {
+            border-left-color: #28a745;
+        }
+        #taskList li.priority-high.completed,
+        #taskList li.priority-medium.completed,
+        #taskList li.priority-low.completed {
+            border-left-color: #28a745;
+        }
+
+        /* ЗАДАНИЕ 4: просроченные задачи */
+        #taskList li.overdue {
+            background: #fff5f5;
+            border-left-color: #dc3545 !important;
+        }
+        #taskList li.overdue .task-deadline {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .task-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .task-text {
+            font-size: 15px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            color: #999;
+            flex-wrap: wrap;
+        }
+
+        .task-deadline {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .priority-badge.high {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .priority-badge.medium {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+        .priority-badge.low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #aaa;
+            padding: 40px 0;
+            font-size: 16px;
+            display: block !important;
+            background: none !important;
+            border: none !important;
+        }
+
+        .empty-message span {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .clear-all {
+            display: block;
+            margin: 20px auto 0;
+            padding: 8px 20px;
+            background: none;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .clear-all:hover {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Менеджер задач</h1>
+        <p class="subtitle">Добавляйте, отмечайте и удаляйте задачи</p>
+
+        <div class="input-section">
+            <div class="input-row">
+                <input type="text" id="taskInput" placeholder="Введите задачу..." />
+                <button id="addTaskBtn">➕ Добавить</button>
+            </div>
+            <div class="options-row">
+                <label>
+                    Приоритет:
+                    <select id="prioritySelect">
+                        <option value="medium" selected>Средний</option>
+                        <option value="high">Высокий</option>
+                        <option value="low">Низкий</option>
+                    </select>
+                </label>
+                <label>
+                    Срок:
+                    <input type="date" id="deadlineInput">
+                </label>
+            </div>
+        </div>
+
+        <div class="stats">
+            <span>Всего: <span id="totalCount">0</span></span>
+            <span>Выполнено: <span id="completedCount">0</span></span>
+            <span>Активных: <span id="activeCount">0</span></span>
+        </div>
+
+        <div class="filters">
+            <button class="active" data-filter="all">Все</button>
+            <button data-filter="active">Активные</button>
+            <button data-filter="completed">Выполненные</button>
+            <button data-filter="overdue">Просроченные</button>
+        </div>
+
+        <ul id="taskList">
+            <li class="empty-message">
+                <span>📭</span>
+                Нет задач. Добавьте первую!
+            </li>
+        </ul>
+
+        <button class="clear-all" id="clearAllBtn">🗑 Очистить все</button>
+    </div>
+
+    <script src="todo.js"></script>
+</body>
+</html>

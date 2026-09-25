@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание 3 — Валидация формы</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .form-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h1 { text-align: center; margin-top: 0; color: #333; }
+
+        .form-group { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus { border-color: #667eea; }
+        input.error { border-color: #dc3545; background: #fff5f5; }
+        input.success { border-color: #28a745; background: #f0faf0; }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            min-height: 16px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 15px;
+            display: none;
+        }
+
+        .result.ok    { background: #e8f5e9; color: #2e7d32; display: block; }
+        .result.fail  { background: #ffebee; color: #c62828; display: block; }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h1>Регистрация</h1>
+
+        <form id="regForm" novalidate>
+            <div class="form-group">
+                <label for="nameInput">Имя *</label>
+                <input type="text" id="nameInput" placeholder="Введите имя">
+                <small class="error-text" id="nameError"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="emailInput">Email *</label>
+                <input type="text" id="emailInput" placeholder="example@mail.ru">
+                <small class="error-text" id="emailError"></small>
+            </div>
+
+            <button type="submit">Отправить</button>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("regForm");
+        const nameInput = document.getElementById("nameInput");
+        const emailInput = document.getElementById("emailInput");
+        const nameError = document.getElementById("nameError");
+        const emailError = document.getElementById("emailError");
+        const result = document.getElementById("result");
+
+        // Проверка имени
+        function validateName() {
+            const value = nameInput.value.trim();
+            if (value === "") {
+                nameError.textContent = "Имя не может быть пустым";
+                nameInput.classList.remove("success");
+                nameInput.classList.add("error");
+                return false;
+            }
+            if (value.length < 2) {
+                nameError.textContent = "Имя должно быть не короче 2 символов";
+                nameInput.classList.remove("success");
+                nameInput.classList.add("error");
+                return false;
+            }
+            nameError.textContent = "";
+            nameInput.classList.remove("error");
+            nameInput.classList.add("success");
+            return true;
+        }
+
+        // Проверка email
+        function validateEmail() {
+            const value = emailInput.value.trim();
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (value === "") {
+                emailError.textContent = "Email не может быть пустым";
+                emailInput.classList.remove("success");
+                emailInput.classList.add("error");
+                return false;
+            }
+            if (!regex.test(value)) {
+                emailError.textContent = "Введите корректный email (например, user@mail.ru)";
+                emailInput.classList.remove("success");
+                emailInput.classList.add("error");
+                return false;
+            }
+            emailError.textContent = "";
+            emailInput.classList.remove("error");
+            emailInput.classList.add("success");
+            return true;
+        }
+
+        // Живая валидация при вводе
+        nameInput.addEventListener("input", () => {
+            if (nameInput.value !== "") validateName();
+        });
+        emailInput.addEventListener("input", () => {
+            if (emailInput.value !== "") validateEmail();
+        });
+
+        // Отправка формы
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const isNameOk = validateName();
+            const isEmailOk = validateEmail();
+
+            if (isNameOk && isEmailOk) {
+                result.className = "result ok";
+                result.textContent = `✅ Форма успешно отправлена! Привет, ${nameInput.value.trim()}!`;
+                // Очищаем форму
+                setTimeout(() => {
+                    form.reset();
+                    nameInput.classList.remove("success");
+                    emailInput.classList.remove("success");
+                    result.className = "result";
+                }, 2500);
+            } else {
+                result.className = "result fail";
+                result.textContent = "❌ Пожалуйста, исправьте ошибки в форме";
+            }
+        });
+    </script>
+</body>
+</html>

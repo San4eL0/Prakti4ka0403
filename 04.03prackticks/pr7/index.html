@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Валидация формы</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация</h1>
+
+        <form id="registrationForm" novalidate>
+            <!-- Поле Имя -->
+            <div class="form-group">
+                <label for="name">Имя *</label>
+                <input type="text" id="name" placeholder="Введите имя" required>
+                <small class="error-message" id="nameError"></small>
+            </div>
+
+            <!-- Поле Email -->
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" placeholder="example@mail.ru" required>
+                <small class="error-message" id="emailError"></small>
+            </div>
+
+            <!-- Поле Телефон -->
+            <div class="form-group">
+                <label for="phone">Телефон</label>
+                <input type="tel" id="phone" placeholder="+7 (999) 123-45-67">
+                <small class="error-message" id="phoneError"></small>
+            </div>
+
+            <!-- Поле Дата рождения (ЗАДАНИЕ 4) -->
+            <div class="form-group">
+                <label for="birthdate">Дата рождения *</label>
+                <input type="date" id="birthdate" required>
+                <small class="error-message" id="birthdateError"></small>
+            </div>
+
+            <!-- Поле Пароль (ЗАДАНИЕ 3: кнопка "глаз") -->
+            <div class="form-group">
+                <label for="password">Пароль *</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Минимум 8 символов" required>
+                    <button type="button" class="toggle-password" data-target="password">👁</button>
+                </div>
+                <small class="error-message" id="passwordError"></small>
+            </div>
+
+            <!-- Поле Подтверждение пароля (ЗАДАНИЕ 3: кнопка "глаз") -->
+            <div class="form-group">
+                <label for="confirmPassword">Подтверждение пароля *</label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+                    <button type="button" class="toggle-password" data-target="confirmPassword">👁</button>
+                </div>
+                <small class="error-message" id="confirmError"></small>
+            </div>
+
+            <!-- Чекбокс согласия -->
+            <div class="form-group checkbox-group">
+                <label>
+                    <input type="checkbox" id="agree" required>
+                    Я согласен с условиями обработки данных *
+                </label>
+                <small class="error-message" id="agreeError"></small>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="buttons">
+                <button type="submit" class="btn-submit">Зарегистрироваться</button>
+                <button type="reset" class="btn-reset">Очистить</button>
+            </div>
+        </form>
+
+        <div id="successMessage" class="success-hidden">
+            Форма успешно отправлена!
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>s

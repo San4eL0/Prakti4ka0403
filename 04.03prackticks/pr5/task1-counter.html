@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание 1 — Счётчик</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .counter-box {
+            background: white;
+            padding: 40px 60px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 {
+            margin: 0 0 20px;
+            color: #333;
+            font-weight: 300;
+        }
+        #counterValue {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            min-width: 150px;
+            transition: transform 0.2s;
+        }
+        #counterValue.bump {
+            transform: scale(1.15);
+        }
+        #counterValue.positive { color: #28a745; }
+        #counterValue.negative { color: #dc3545; }
+        #counterValue.zero    { color: #667eea; }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            font-size: 22px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        #plusBtn  { background: #28a745; }
+        #minusBtn { background: #dc3545; }
+        #resetBtn { background: #6c757d; font-size: 14px; padding: 12px 18px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        button:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="counter-box">
+        <h1>Счётчик</h1>
+        <div id="counterValue" class="zero">0</div>
+        <div class="buttons">
+            <button id="minusBtn">−1</button>
+            <button id="resetBtn">Сброс</button>
+            <button id="plusBtn">+1</button>
+        </div>
+    </div>
+
+    <script>
+        const valueEl = document.getElementById("counterValue");
+        const plusBtn = document.getElementById("plusBtn");
+        const minusBtn = document.getElementById("minusBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        let count = 0;
+
+        function updateDisplay() {
+            valueEl.textContent = count;
+
+            // Цвет в зависимости от значения
+            valueEl.classList.remove("positive", "negative", "zero");
+            if (count > 0)      valueEl.classList.add("positive");
+            else if (count < 0) valueEl.classList.add("negative");
+            else                valueEl.classList.add("zero");
+
+            // Анимация "толчка"
+            valueEl.classList.add("bump");
+            setTimeout(() => valueEl.classList.remove("bump"), 150);
+        }
+
+        plusBtn.addEventListener("click", () => {
+            count++;
+            updateDisplay();
+        });
+
+        minusBtn.addEventListener("click", () => {
+            count--;
+            updateDisplay();
+        });
+
+        resetBtn.addEventListener("click", () => {
+            count = 0;
+            updateDisplay();
+        });
+
+        // Обработка клавиш + и -
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "+" || e.key === "=") plusBtn.click();
+            if (e.key === "-") minusBtn.click();
+            if (e.key === "0") resetBtn.click();
+        });
+    </script>
+</body>
+</html>

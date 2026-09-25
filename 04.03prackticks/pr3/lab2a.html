@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторная 2а — Массивы</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f7fa;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .task {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+        }
+        .task h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: scale(1.02);
+        }
+        .output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 60px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .flex {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .data-display {
+            background: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #2c3e50;">Лабораторная работа №2а</h1>
+    <p style="text-align: center; color: #7f8c8d;">Массивы и операции с ними</p>
+
+    <!-- Текущие данные -->
+    <div class="section">
+        <h2>📊 Текущие данные</h2>
+        <div class="data-display">
+            <p><strong>Числа:</strong> <span id="numbersDisplay"></span></p>
+            <p><strong>Фрукты:</strong> <span id="fruitsDisplay"></span></p>
+            <p><strong>Студенты:</strong> <span id="studentsDisplay"></span></p>
+            <p><strong>Имена студентов:</strong> <span id="studentsList"></span></p>
+        </div>
+        <button onclick="resetData()" style="background:#e74c3c;">🔄 Сбросить данные</button>
+    </div>
+
+    <!-- Вывод -->
+    <div class="section">
+        <h2>📤 Результаты операций</h2>
+        <div class="output" id="output">Нажмите на кнопку задания для вывода результата</div>
+    </div>
+
+    <!-- Задание 1 -->
+    <div class="section">
+        <h2>1️⃣ Задание 1: Базовые операции с массивами</h2>
+        <div class="task">
+            <h4>1.1 Добавление и удаление элементов</h4>
+            <div class="flex">
+                <input type="number" id="newNumberInput" placeholder="Число..." style="width:100px;">
+                <button onclick="addNumber()">Добавить в конец</button>
+                <button onclick="addNumberFront()">Добавить в начало</button>
+                <button onclick="removeLastNumber()" style="background:#e74c3c;">Удалить последний</button>
+                <button onclick="removeFirstNumber()" style="background:#e74c3c;">Удалить первый</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>1.2 Удаление по индексу</h4>
+            <div class="flex">
+                <input type="number" id="removeIndexInput" placeholder="Индекс..." style="width:100px;" min="0">
+                <button onclick="removeAtIndex()" style="background:#e74c3c;">Удалить по индексу</button>
+                <button onclick="insertAtIndex()">Вставить на позицию</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Задание 2 -->
+    <div class="section">
+        <h2>2️⃣ Задание 2: Функциональные методы</h2>
+        <div class="task">
+            <h4>2.1 Преобразование (map)</h4>
+            <button onclick="doubleNumbers()">Удвоить числа</button>
+            <button onclick="fruitsToUpper()">Фрукты заглавными</button>
+        </div>
+        <div class="task">
+            <h4>2.2 Фильтрация (filter)</h4>
+            <button onclick="filterEven()">Только чётные</button>
+            <button onclick="filterGreaterThan20()">Числа &gt; 20</button>
+            <button onclick="filterStudentsByGrade()">Студенты с оценкой ≥ 80</button>
+        </div>
+        <div class="task">
+            <h4>2.3 Поиск (find)</h4>
+            <div class="flex">
+                <input type="number" id="findNumberInput" placeholder="Число..." style="width:100px;">
+                <button onclick="findNumber()">Найти число</button>
+                <input type="text" id="findStudentInput" placeholder="Имя студента..." style="width:150px;">
+                <button onclick="findStudent()">Найти студента</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>2.4 Агрегация (reduce)</h4>
+            <button onclick="sumNumbers()">Сумма всех чисел</button>
+            <button onclick="avgStudentsAge()">Средний возраст студентов</button>
+            <button onclick="maxNumber()">Максимальное число</button>
+        </div>
+    </div>
+
+    <!-- Задание 3 -->
+    <div class="section">
+        <h2>3️⃣ Задание 3: Проверка и сортировка</h2>
+        <div class="task">
+            <h4>3.1 Проверка (some, every, includes)</h4>
+            <button onclick="checkEvenExists()">Есть ли чётные?</button>
+            <button onclick="checkAllEven()">Все ли чётные?</button>
+            <div class="flex">
+                <input type="text" id="includesInput" placeholder="Элемент..." style="width:150px;">
+                <button onclick="checkIncludes()">Содержит ли массив?</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>3.2 Сортировка (sort)</h4>
+            <button onclick="sortNumbersAsc()">По возрастанию</button>
+            <button onclick="sortNumbersDesc()">По убыванию</button>
+            <button onclick="sortStudentsByGrade()">Студенты по оценке</button>
+            <button onclick="reverseArray()">Развернуть массив</button>
+        </div>
+    </div>
+
+    <!-- Задание 4 -->
+    <div class="section">
+        <h2>4️⃣ Задание 4: Матрицы и сложные операции</h2>
+        <div class="task">
+            <h4>4.1 Операции с матрицей</h4>
+            <button onclick="sumMatrix()">Сумма элементов</button>
+            <button onclick="transposeMatrix()">Транспонировать</button>
+            <button onclick="flattenMatrix()">Плоский массив</button>
+        </div>
+        <div class="task">
+            <h4>4.2 Группировка и статистика</h4>
+            <button onclick="groupStudentsByGroup()">Группировка по группе</button>
+            <button onclick="statsByGroup()">Статистика по группам</button>
+        </div>
+    </div>
+
+    <!-- Задание 5 -->
+    <div class="section">
+        <h2>5️⃣ Задание 5: Комбинированные задачи</h2>
+        <div class="task">
+            <h4>5.1 Сложные запросы</h4>
+            <button onclick="getTopStudents()">Top-3 студентов</button>
+            <button onclick="getUniqueAges()">Уникальные возрасты</button>
+            <button onclick="averageGradeByGroup()">Средняя оценка по группам</button>
+        </div>
+    </div>
+
+    <!-- ЗАДАНИЯ ДЛЯ САМОСТОЯТЕЛЬНОГО ВЫПОЛНЕНИЯ -->
+    <div class="section" style="background:#fffbea; border: 2px solid #f39c12;">
+        <h2 style="color:#e67e22; border-color:#f39c12;">⭐ Самостоятельная работа</h2>
+
+        <div class="task">
+            <h4>Задание 1: Работа с числами</h4>
+            <button onclick="getPrimes()" style="background:#e67e22;">Простые числа</button>
+            <button onclick="getSquares()" style="background:#e67e22;">Квадраты чисел</button>
+            <button onclick="getProduct()" style="background:#e67e22;">Произведение всех чисел</button>
+        </div>
+
+        <div class="task">
+            <h4>Задание 2: Работа со строками</h4>
+            <button onclick="getLongestWord()" style="background:#e67e22;">Самое длинное слово</button>
+            <button onclick="getShortestWord()" style="background:#e67e22;">Самое короткое слово</button>
+            <button onclick="countWordsByLength()" style="background:#e67e22;">Сгруппировать по длине</button>
+        </div>
+
+        <div class="task">
+            <h4>Задание 3: Работа с объектами</h4>
+            <div class="flex">
+                <input type="text" id="groupSearchInput" placeholder="Группа (ИС-201)..." value="ИС-201" style="width:180px;">
+                <button onclick="findByGroup()" style="background:#e67e22;">Найти по группе</button>
+            </div>
+            <div class="flex">
+                <input type="number" id="updateIdInput" placeholder="ID..." value="2" style="width:80px;">
+                <input type="text" id="updateGradeInput" placeholder="Новая оценка" value="99" style="width:120px;">
+                <button onclick="updateStudent()" style="background:#e67e22;">Обновить оценку</button>
+            </div>
+            <div class="flex">
+                <input type="number" id="deleteIdInput" placeholder="ID..." value="3" style="width:80px;">
+                <button onclick="deleteStudent()" style="background:#c0392b;">Удалить студента</button>
+            </div>
+        </div>
+
+        <div class="task">
+            <h4>Задание 4: Комбинированные задачи</h4>
+            <button onclick="getTopStudentInGroup()" style="background:#e67e22;">Лучший в каждой группе</button>
+            <button onclick="getAgeDistribution()" style="background:#e67e22;">Распределение по возрасту</button>
+            <div class="flex">
+                <input type="number" id="thresholdInput" placeholder="Порог" value="80" style="width:100px;">
+                <button onclick="getPassingStudents()" style="background:#e67e22;">Студенты выше порога</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="lab2a.js"></script>
+</body>
+</html>

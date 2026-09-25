@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание 2 — Смена темы</title>
+    <style>
+        * { transition: background-color 0.4s, color 0.4s; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #f5f7fa;
+            color: #222;
+        }
+
+        /* Тёмная тема */
+        body.dark {
+            background-color: #1a1a2e;
+            color: #eaeaea;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark .container {
+            background: #16213e;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 { margin-top: 0; }
+
+        #themeToggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #themeToggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+
+        body.dark .card {
+            background: #0f3460;
+            border-left-color: #e94560;
+        }
+
+        .card h3 { margin-top: 0; }
+
+        .hint {
+            font-size: 13px;
+            color: #888;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        body.dark .hint { color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌗 Смена темы</h1>
+        <p>Нажмите на кнопку ниже, чтобы переключить светлую и тёмную тему.</p>
+
+        <button id="themeToggle">
+            <span id="themeIcon">🌞</span>
+            <span id="themeLabel">Тёмная тема</span>
+        </button>
+
+        <div class="card">
+            <h3>Пример содержимого</h3>
+            <p>Этот блок меняет фон и цвет текста вместе с темой страницы.</p>
+        </div>
+
+        <p class="hint">Тема сохраняется в localStorage и применяется при следующем открытии.</p>
+    </div>
+
+    <script>
+        const body = document.body;
+        const toggleBtn = document.getElementById("themeToggle");
+        const themeIcon = document.getElementById("themeIcon");
+        const themeLabel = document.getElementById("themeLabel");
+
+        // Загружаем сохранённую тему
+        function loadTheme() {
+            const saved = localStorage.getItem("theme");
+            if (saved === "dark") {
+                body.classList.add("dark");
+                updateButton(true);
+            } else {
+                updateButton(false);
+            }
+        }
+
+        // Обновление надписи и иконки кнопки
+        function updateButton(isDark) {
+            if (isDark) {
+                themeIcon.textContent = "🌙";
+                themeLabel.textContent = "Светлая тема";
+            } else {
+                themeIcon.textContent = "🌞";
+                themeLabel.textContent = "Тёмная тема";
+            }
+        }
+
+        // Переключение темы
+        toggleBtn.addEventListener("click", () => {
+            body.classList.toggle("dark");
+            const isDark = body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            updateButton(isDark);
+        });
+
+        loadTheme();
+    </script>
+</body>
+</html>

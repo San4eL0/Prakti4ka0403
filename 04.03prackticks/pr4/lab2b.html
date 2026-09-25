@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторная 2б — Функции</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background: #f5f7fa;
+        }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .task {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .task h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 60px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .flex {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+
+        /* Стили для самостоятельной работы */
+        .self-work {
+            background: #fffbea;
+            border: 2px solid #f39c12;
+        }
+        .self-work h2 {
+            color: #e67e22;
+            border-color: #f39c12;
+        }
+        .self-work button {
+            background: #e67e22;
+        }
+        .self-work button:hover {
+            background: #d35400;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧮 Лабораторная работа №2б</h1>
+    <p class="subtitle">Использование функций для решения базовых задач</p>
+
+    <!-- Результаты -->
+    <div class="section">
+        <h2>📤 Результаты</h2>
+        <div class="output" id="output">Нажмите на кнопку задания, чтобы увидеть результат</div>
+    </div>
+
+    <!-- Задание 1 -->
+    <div class="section">
+        <h2>1️⃣ Знакомство с функциями</h2>
+        <div class="task">
+            <h4>1.1 Простейшая функция</h4>
+            <button onclick="demoSimpleFunction()">Показать простую функцию</button>
+        </div>
+        <div class="task">
+            <h4>1.2 Функция с параметрами</h4>
+            <button onclick="demoGreeting()">Приветствие</button>
+            <button onclick="demoCalculator()">Калькулятор</button>
+        </div>
+        <div class="task">
+            <h4>1.3 Функция с возвратом значения</h4>
+            <button onclick="demoReturn()">Демонстрация return</button>
+        </div>
+    </div>
+
+    <!-- Задание 2 -->
+    <div class="section">
+        <h2>2️⃣ Виды функций</h2>
+        <div class="task">
+            <h4>2.1 Функция без параметров</h4>
+            <button onclick="demoNoParams()">Функция без параметров</button>
+        </div>
+        <div class="task">
+            <h4>2.2 Параметры по умолчанию</h4>
+            <button onclick="demoDefaultParams()">Параметры по умолчанию</button>
+        </div>
+    </div>
+
+    <!-- Задание 3 -->
+    <div class="section">
+        <h2>3️⃣ Решаем задачи с функциями</h2>
+        <div class="task">
+            <h4>3.1 Проверка возраста</h4>
+            <div class="flex">
+                <input type="number" id="ageInput" placeholder="Возраст..." value="20" min="0" max="120">
+                <button onclick="taskCheckAge()">Проверить</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>3.2 Перевод температуры</h4>
+            <div class="flex">
+                <input type="number" id="tempInput" placeholder="°C..." value="25">
+                <button onclick="taskConvertTemp()">Перевести в °F</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>3.3 Максимум из двух чисел</h4>
+            <div class="flex">
+                <input type="number" id="num1Input" value="10" style="width:100px;">
+                <input type="number" id="num2Input" value="20" style="width:100px;">
+                <button onclick="taskMaxNumber()">Найти максимум</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Задание 4 -->
+    <div class="section">
+        <h2>4️⃣ Функции для работы с массивами</h2>
+        <div class="task">
+            <h4>4.1 Сумма элементов массива</h4>
+            <button onclick="taskSumArray()">Сумма чисел</button>
+        </div>
+        <div class="task">
+            <h4>4.2 Поиск максимального</h4>
+            <button onclick="taskMaxInArray()">Максимальное число</button>
+        </div>
+        <div class="task">
+            <h4>4.3 Фильтрация чисел</h4>
+            <div class="flex">
+                <input type="number" id="filterInput" value="15">
+                <button onclick="taskFilterArray()">Числа больше порога</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Задание 5 -->
+    <div class="section">
+        <h2>5️⃣ Функции для работы с объектами</h2>
+        <div class="task">
+            <h4>5.1 Информация о пользователях</h4>
+            <button onclick="taskUserInfo()">Показать пользователей</button>
+        </div>
+        <div class="task">
+            <h4>5.2 Поиск по имени</h4>
+            <div class="flex">
+                <input type="text" id="searchNameInput" value="Анна">
+                <button onclick="taskFindUser()">Найти пользователя</button>
+            </div>
+        </div>
+        <div class="task">
+            <h4>5.3 Средний возраст</h4>
+            <button onclick="taskAverageAge()">Средний возраст</button>
+        </div>
+    </div>
+
+    <!-- Задание 6 -->
+    <div class="section">
+        <h2>6️⃣ Комбинируем всё вместе</h2>
+        <div class="task">
+            <h4>6.1 Статистика по пользователям</h4>
+            <button onclick="taskUserStats()">Полная статистика</button>
+        </div>
+        <div class="task">
+            <h4>6.2 Группировка по городам</h4>
+            <button onclick="taskGroupByCity()">Группировка</button>
+        </div>
+    </div>
+
+    <!-- ⭐ САМОСТОЯТЕЛЬНАЯ РАБОТА -->
+    <div class="section self-work">
+        <h2>⭐ Самостоятельная работа</h2>
+
+        <div class="task">
+            <h4>Задание 1: Свои функции</h4>
+            <div class="flex">
+                <input type="number" id="mult1" value="6" style="width:80px;">
+                <input type="number" id="mult2" value="7" style="width:80px;">
+                <button onclick="taskMultiply()">multiply(a, b)</button>
+            </div>
+            <div class="flex">
+                <input type="number" id="evenInput" value="12" style="width:80px;">
+                <button onclick="taskIsEven()">isEven(n)</button>
+            </div>
+            <div class="flex">
+                <input type="text" id="firstNameInput" value="Иван" style="width:120px;">
+                <input type="text" id="lastNameInput" value="Петров" style="width:120px;">
+                <button onclick="taskGetFullName()">getFullName()</button>
+            </div>
+        </div>
+
+        <div class="task">
+            <h4>Задание 2: Функции для массивов</h4>
+            <button onclick="taskGetEvenNumbers()">getEvenNumbers(arr)</button>
+            <button onclick="taskGetAverage()">getAverage(arr)</button>
+            <button onclick="taskReverseArray()">reverseArray(arr)</button>
+        </div>
+
+        <div class="task">
+            <h4>Задание 3: Функции для объектов</h4>
+            <button onclick="taskGetUserNames()">getUserNames(arr)</button>
+            <div class="flex">
+                <input type="text" id="cityInput" value="Москва" style="width:120px;">
+                <button onclick="taskGetUsersByCity()">getUsersByCity(arr, city)</button>
+            </div>
+            <button onclick="taskGetOldestUser()">getOldestUser(arr)</button>
+        </div>
+
+        <div class="task">
+            <h4>Задание 4: Практические задачи</h4>
+            <div class="flex">
+                <input type="number" id="priceInput" value="1000" style="width:100px;">
+                <input type="number" id="discountInput" value="20" style="width:80px;">
+                <button onclick="taskCalculateDiscount()">calculateDiscount()</button>
+            </div>
+            <div class="flex">
+                <input type="text" id="passwordInput" value="qwerty123" style="width:150px;">
+                <button onclick="taskIsPasswordValid()">isPasswordValid()</button>
+            </div>
+            <div class="flex">
+                <input type="number" id="weatherInput" value="15" style="width:80px;">
+                <button onclick="taskGetWeatherDescription()">getWeatherDescription()</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="lab2b.js"></script>
+</body>
+</html>

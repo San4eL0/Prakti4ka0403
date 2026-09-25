@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная №2 — Функции и массивы</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #ffe8ec;
+            border-left: 4px solid #f5576c;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .task {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .task h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .task p {
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            width: 90px;
+        }
+
+        input.wide { width: 200px; }
+
+        input:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #f5576c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #e04258;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        #output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 80px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .hint {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Лабораторная работа №2</h1>
+        <p class="subtitle">Функции и работа с массивами</p>
+
+        <div class="info-box">
+            💡 <strong>Задания для самостоятельного выполнения.</strong>
+            Нажимайте на кнопки — результаты появятся в блоке ниже.
+        </div>
+
+        <!-- Задание 1 -->
+        <div class="task">
+            <h3>1️⃣ Калькулятор (функции add, subtract, multiply, divide)</h3>
+            <p>Введите два числа и выберите операцию.</p>
+            <div class="flex">
+                <input type="number" id="calcA" value="12">
+                <input type="number" id="calcB" value="4">
+                <button onclick="taskCalc('add')">+ add</button>
+                <button onclick="taskCalc('subtract')">− subtract</button>
+                <button onclick="taskCalc('multiply')">× multiply</button>
+                <button onclick="taskCalc('divide')">÷ divide</button>
+            </div>
+            <div class="flex" style="margin-top:10px;">
+                <button onclick="taskCalcAll()" style="background:#2c3e50;">Показать все операции</button>
+            </div>
+        </div>
+
+        <!-- Задание 2 -->
+        <div class="task">
+            <h3>2️⃣ Среднее арифметическое массива</h3>
+            <p>Введите числа через запятую.</p>
+            <div class="flex">
+                <input type="text" class="wide" id="avgArray" value="10, 20, 30, 40, 50">
+                <button onclick="taskAverage()">Вычислить среднее</button>
+            </div>
+        </div>
+
+        <!-- Задание 3 -->
+        <div class="task">
+            <h3>3️⃣ Обратный порядок массива</h3>
+            <p>Введите числа или слова через запятую (без использования reverse()).</p>
+            <div class="flex">
+                <input type="text" class="wide" id="reverseArray" value="1, 2, 3, 4, 5">
+                <button onclick="taskReverse()">Развернуть</button>
+            </div>
+        </div>
+
+        <!-- Задание 4 -->
+        <div class="task">
+            <h3>4️⃣ Уникальные элементы (удаление дубликатов)</h3>
+            <p>Введите значения через запятую.</p>
+            <div class="flex">
+                <input type="text" class="wide" id="uniqueArray" value="1, 2, 2, 3, 3, 3, 4, 5, 5">
+                <button onclick="taskUnique()">Убрать дубликаты</button>
+            </div>
+        </div>
+
+        <!-- Демонстрация теории -->
+        <div class="task" style="border-left-color: #9b59b6;">
+            <h3>🔬 Демонстрация теории</h3>
+            <button onclick="demoFunctions()" style="background:#9b59b6;">Функции</button>
+            <button onclick="demoArrayMethods()" style="background:#9b59b6;">Методы массивов</button>
+            <button onclick="demoIteration()" style="background:#9b59b6;">Перебор массивов</button>
+        </div>
+
+        <!-- Вывод -->
+        <div id="output">👋 Нажмите на любую кнопку для вывода результата...</div>
+
+        <p class="hint">Откройте консоль (F12) — там тоже будут все результаты</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
