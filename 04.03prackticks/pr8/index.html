@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Системный калькулятор на JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>🖥️ Вычисления настроек пользователя</h1>
+    <p class="subtitle">BOM и Web API в действии</p>
+
+    <!-- Экран -->
+    <div class="card" id="screenInfo">
+        <h2>📺 Информация об экране</h2>
+        <p>Разрешение: <span class="result" id="screenRes"></span></p>
+        <p>Доступная область: <span class="result" id="availRes"></span></p>
+        <p>Количество пикселей: <span class="result" id="pixels"></span> MP</p>
+        <p>Соотношение сторон: <span class="result" id="aspectRatio"></span></p>
+        <p>Глубина цвета: <span class="result" id="colorDepth"></span> бит</p>
+        <p>Байт на 1 пиксель: <span class="result" id="bytesPerPixel"></span> байт</p>
+        <p>Общий объём видеопамяти: <span class="result" id="videoMemory"></span></p>
+    </div>
+
+    <!-- ОЗУ -->
+    <div class="card" id="memoryInfo">
+        <h2>💾 Оперативная память (ОЗУ)</h2>
+        <p>Объём: <span class="result" id="ramGB"></span> ГБ</p>
+        <p>Объём в МБ: <span class="result" id="ramMB"></span> МБ</p>
+        <p>Объём в КБ: <span class="result" id="ramKB"></span> КБ</p>
+        <p>Вместится страниц А4 (≈10 КБ): <span class="result" id="ramPages"></span></p>
+    </div>
+
+    <!-- Браузер -->
+    <div class="card" id="browserInfo">
+        <h2>🌐 Информация о браузере</h2>
+        <p>Название: <span class="result" id="browserName"></span></p>
+        <p>Разрядность ОС: <span class="result" id="osArch"></span></p>
+        <p>Язык системы: <span class="result" id="sysLang"></span></p>
+        <p>Платформа: <span class="result" id="platform"></span></p>
+    </div>
+
+    <!-- Сеть -->
+    <div class="card" id="networkInfo">
+        <h2>📡 Сетевые расчёты</h2>
+        <p>Тип соединения: <span class="result" id="connType"></span></p>
+        <p>Скорость (downlink): <span class="result" id="realSpeed"></span> Мбит/с</p>
+        <p>Скачивание файла 500 МБ займёт: <span class="result" id="downloadTime"></span> сек</p>
+        <p class="note">Данные о сети обновляются автоматически при изменении соединения</p>
+    </div>
+
+    <!-- Дополнительно -->
+    <div class="card" id="extraInfo">
+        <h2>⏱️ Дополнительно</h2>
+        <p>Разрешение окна браузера: <span class="result" id="windowSize"></span></p>
+        <p>Время загрузки страницы: <span class="result" id="loadTime"></span></p>
+        <p>Часовой пояс: <span class="result" id="timezone"></span></p>
+        <p>Онлайн-статус: <span class="result" id="onlineStatus"></span></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
