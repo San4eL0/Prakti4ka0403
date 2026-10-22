@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ПР16 — Лента новостей</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f4f8;
+            color: #2c3e50;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .toolbar select, .toolbar input {
+            padding: 10px 14px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        .toolbar select:focus, .toolbar input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .toolbar button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .toolbar button:hover { background: #2980b9; }
+        .toolbar button.green { background: #27ae60; }
+        .toolbar button.green:hover { background: #229954; }
+        .toolbar button.red { background: #e74c3c; }
+        .toolbar button.red:hover { background: #c0392b; }
+        .toolbar button.orange { background: #f39c12; }
+        .toolbar button.purple { background: #9b59b6; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        #postsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: 0.2s;
+        }
+        .post-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .post-header h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            line-height: 1.3;
+        }
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: transform 0.2s;
+        }
+        .star-btn:hover { transform: scale(1.2); }
+        .star-active { color: #f39c12; }
+        .star-inactive { color: #ccc; }
+
+        .post-meta {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .post-meta strong { color: #3498db; }
+        .post-preview {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .post-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .tag {
+            background: #e8f0fe;
+            color: #2980b9;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .post-likes {
+            font-size: 13px;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .panel h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+
+        #logContainer .log-entry {
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-left: 3px solid #3498db;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .log-time {
+            color: #999;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+        .log-entry strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .log-entry small {
+            color: #7f8c8d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            background: white;
+            border-radius: 12px;
+        }
+
+        #favCount {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📰 Лента новостей</h1>
+    <p class="subtitle">JSON · Map · Set · Фильтрация · Избранное · Лог</p>
+
+    <!-- Тулбар -->
+    <div class="toolbar">
+        <button class="green" onclick="loadPosts()">📥 Загрузить посты</button>
+        <button class="red" onclick="resetAll()">🗑 Сбросить всё</button>
+        <select id="authorFilter" onchange="applyFilters()">
+            <option value="">Все авторы</option>
+        </select>
+        <select id="categoryFilter" onchange="applyFilters()">
+            <option value="">Все категории</option>
+        </select>
+        <select id="sortOrder" onchange="applyFilters()">
+            <option value="date-desc">По дате (новые)</option>
+            <option value="date-asc">По дате (старые)</option>
+            <option value="likes-desc">По лайкам</option>
+        </select>
+        <button class="orange" onclick="showFavorites()">
+            ★ Избранное <span id="favCount">0</span>
+        </button>
+        <button class="purple" onclick="showRecommendations()">✨ Рекомендации</button>
+        <input type="text" id="searchInput" placeholder="Поиск..." oninput="searchPosts(this.value)">
+        <button onclick="exportState()">💾 Экспорт</button>
+    </div>
+
+    <div class="layout">
+        <div>
+            <div id="postsContainer">
+                <div class="empty-state">Нажмите «Загрузить посты»</div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h3>📊 Статистика тегов (Топ-5)</h3>
+                <div id="tagStats">—</div>
+            </div>
+            <div class="panel">
+                <h3>📜 Лог действий (последние 5)</h3>
+                <div id="logContainer">
+                    <p style="color:#999;font-size:13px;">Здесь будут действия...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. ИСХОДНЫЕ ДАННЫЕ (JSON-строка от «сервера»)
+// ============================================================
+const API_RESPONSE = `[
+    {
+        "id": 1,
+        "title": "JavaScript: новые возможности ES2025",
+        "author": "Анна Петрова",
+        "date": "2025-06-20",
+        "category": "Технологии",
+        "tags": ["javascript", "es2025", "web"],
+        "likes": 42,
+        "preview": "Обзор новых фич JavaScript, включая Records и Tuples..."
+    },
+    {
+        "id": 2,
+        "title": "React 20: что изменилось",
+        "author": "Иван Сидоров",
+        "date": "2025-06-18",
+        "category": "Технологии",
+        "tags": ["react", "frontend", "web"],
+        "likes": 38,
+        "preview": "Крупное обновление React: серверные компоненты становятся стандартом..."
+    },
+    {
+        "id": 3,
+        "title": "Как я перешёл на TypeScript",
+        "author": "Анна Петрова",
+        "date": "2025-06-15",
+        "category": "Разработка",
+        "tags": ["typescript", "javascript", "опыт"],
+        "likes": 27,
+        "preview": "Личный опыт миграции большого проекта с JavaScript на TypeScript..."
+    },
+    {
+        "id": 4,
+        "title": "Дизайн-системы: с чего начать",
+        "author": "Мария Козлова",
+        "date": "2025-06-22",
+        "category": "Дизайн",
+        "tags": ["design", "ui", "components"],
+        "likes": 15,
+        "preview": "Пошаговое руководство по созданию дизайн-системы для продукта..."
+    },
+    {
+        "id": 5,
+        "title": "Node.js: оптимизация производительности",
+        "author": "Иван Сидоров",
+        "date": "2025-06-10",
+        "category": "Разработка",
+        "tags": ["nodejs", "performance", "backend"],
+        "likes": 53,
+        "preview": "Пять проверенных способов ускорить ваше Node.js приложение..."
+    },
+    {
+        "id": 6,
+        "title": "CSS Container Queries на практике",
+        "author": "Мария Козлова",
+        "date": "2025-06-21",
+        "category": "Дизайн",
+        "tags": ["css", "responsive", "web"],
+        "likes": 31,
+        "preview": "Как использовать Container Queries для создания адаптивных компонентов..."
+    },
+    {
+        "id": 7,
+        "title": "Безопасность веб-приложений в 2025",
+        "author": "Пётр Волков",
+        "date": "2025-06-19",
+        "category": "Безопасность",
+        "tags": ["security", "web", "best-practices"],
+        "likes": 61,
+        "preview": "Актуальные угрозы и методы защиты современных веб-приложений..."
+    }
+]`;
+
+// ============================================================
+// 2. ГЛОБАЛЬНЫЕ СТРУКТУРЫ ДАННЫХ
+// ============================================================
+let posts = [];
+const postsMap = new Map();
+const favorites = new Set();
+const actionLog = [];
+let currentDisplayPosts = [];
+
+// ============================================================
+// 3. УТИЛИТЫ
+// ============================================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function addLog(action, details = '') {
+    const entry = {
+        action,
+        details,
+        timestamp: new Date().toLocaleTimeString('ru-RU')
+    };
+    actionLog.unshift(entry);
+    if (actionLog.length > 5) actionLog.pop();
+    renderLog();
+}
+
+function renderLog() {
+    const container = document.getElementById('logContainer');
+    if (actionLog.length === 0) {
+        container.innerHTML = '<p style="color:#999;font-size:13px;">Здесь будут действия...</p>';
+        return;
+    }
+    container.innerHTML = actionLog.map(entry => `
+        <div class="log-entry">
+            <span class="log-time">${entry.timestamp}</span>
+            <strong>${escapeHtml(entry.action)}</strong>
+            ${entry.details ? `<small>${escapeHtml(entry.details)}</small>` : ''}
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// 4. ПАРСИНГ JSON И ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+function loadPosts() {
+    try {
+        posts = JSON.parse(API_RESPONSE);
+    } catch (error) {
+        console.error('Ошибка парсинга JSON:', error);
+        document.getElementById('postsContainer').innerHTML =
+            '<p style="color:red;">Ошибка загрузки данных!</p>';
+        return;
+    }
+
+    // Map для быстрого доступа по ID
+    postsMap.clear();
+    posts.forEach(post => postsMap.set(post.id, post));
+
+    // Уникальные авторы (Set)
+    const uniqueAuthors = new Set(posts.map(p => p.author));
+    fillSelect('authorFilter', 'Все авторы', [...uniqueAuthors].sort());
+
+    // Уникальные категории (Set)
+    const uniqueCategories = new Set(posts.map(p => p.category));
+    fillSelect('categoryFilter', 'Все категории', [...uniqueCategories].sort());
+
+    // Отображаем всё
+    currentDisplayPosts = [...posts];
+    renderPosts(currentDisplayPosts);
+
+    // Статистика тегов
+    renderTagStats();
+
+    addLog('Загружено постов', `${posts.length} шт.`);
+}
+
+function fillSelect(id, defaultLabel, items) {
+    const select = document.getElementById(id);
+    select.innerHTML = `<option value="">${defaultLabel}</option>`;
+    items.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+    });
+}
+
+// ============================================================
+// 5. РЕНДЕР ПОСТОВ
+// ============================================================
+function renderPosts(postsToRender) {
+    const container = document.getElementById('postsContainer');
+
+    if (postsToRender.length === 0) {
+        container.innerHTML = '<div class="empty-state">Нет постов для отображения</div>';
+        updateFavCount();
+        return;
+    }
+
+    container.innerHTML = postsToRender.map(post => {
+        const isFav = favorites.has(post.id);
+        const starClass = isFav ? 'star-active' : 'star-inactive';
+        const starSymbol = isFav ? '★' : '☆';
+
+        return `
+            <div class="post-card">
+                <div class="post-header">
+                    <h3>${escapeHtml(post.title)}</h3>
+                    <button class="star-btn ${starClass}"
+                            onclick="toggleFavorite(${post.id})"
+                            title="${isFav ? 'Убрать из избранного' : 'В избранное'}">
+                        ${starSymbol}
+                    </button>
+                </div>
+                <p class="post-meta">
+                    <strong>${escapeHtml(post.author)}</strong> |
+                    ${post.date} |
+                    ${escapeHtml(post.category)}
+                </p>
+                <p class="post-preview">${escapeHtml(post.preview)}</p>
+                <div class="post-tags">
+                    ${post.tags.map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('')}
+                </div>
+                <p class="post-likes">♥ ${post.likes}</p>
+            </div>
+        `;
+    }).join('');
+
+    updateFavCount();
+}
+
+function updateFavCount() {
+    document.getElementById('favCount').textContent = favorites.size;
+}
+
+// ============================================================
+// 6. ИЗБРАННОЕ (Set)
+// ============================================================
+function toggleFavorite(postId) {
+    if (!postsMap.has(postId)) {
+        console.error(`Пост ${postId} не найден`);
+        return;
+    }
+
+    const post = postsMap.get(postId);
+
+    if (favorites.has(postId)) {
+        favorites.delete(postId);
+        addLog('Удалено из избранного', post.title);
+    } else {
+        favorites.add(postId);
+        addLog('Добавлено в избранное', post.title);
+    }
+
+    renderPosts(currentDisplayPosts);
+    saveFavoritesToStorage();
+}
+
+function showFavorites() {
+    const favPosts = posts.filter(p => favorites.has(p.id));
+    currentDisplayPosts = favPosts;
+    renderPosts(favPosts);
+    addLog('Показано избранное', `${favPosts.length} постов`);
+}
+
+// ============================================================
+// 7. ФИЛЬТРАЦИЯ И СОРТИРОВКА
+// ============================================================
+function applyFilters() {
+    const authorFilter = document.getElementById('authorFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+
+    let filtered = [...posts];
+
+    if (authorFilter) {
+        filtered = filtered.filter(p => p.author === authorFilter);
+    }
+    if (categoryFilter) {
+        filtered = filtered.filter(p => p.category === categoryFilter);
+    }
+
+    switch (sortOrder) {
+        case 'date-desc':
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            break;
+        case 'date-asc':
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+            break;
+        case 'likes-desc':
+            filtered.sort((a, b) => b.likes - a.likes);
+            break;
+        default:
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    currentDisplayPosts = filtered;
+    renderPosts(filtered);
+
+    const filters = [];
+    if (authorFilter) filters.push(`автор: ${authorFilter}`);
+    if (categoryFilter) filters.push(`категория: ${categoryFilter}`);
+    filters.push(`сортировка: ${sortOrder}`);
+
+    addLog('Фильтрация', filters.join(', '));
+}
+
+// ============================================================
+// 8. ПОИСК (Задание 2)
+// ============================================================
+function searchPosts(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) {
+        currentDisplayPosts = [...posts];
+    } else {
+        currentDisplayPosts = posts.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            p.preview.toLowerCase().includes(q)
+        );
+    }
+    renderPosts(currentDisplayPosts);
+    addLog('Поиск', `"${query}" → найдено ${currentDisplayPosts.length}`);
+}
+
+// ============================================================
+// 9. СТАТИСТИКА ТЕГОВ (Задание 1)
+// ============================================================
+function renderTagStats() {
+    const container = document.getElementById('tagStats');
+    if (posts.length === 0) {
+        container.innerHTML = '<p style="color:#999;font-size:13px;">Загрузите посты</p>';
+        return;
+    }
+
+    const tagCounts = new Map();
+    posts.forEach(post => {
+        post.tags.forEach(tag => {
+            tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        });
+    });
+
+    const topTags = [...tagCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    container.innerHTML = topTags.map(([tag, count]) => `
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+            <span class="tag">#${escapeHtml(tag)}</span>
+            <strong>${count}</strong>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// 10. РЕКОМЕНДАЦИИ (Задание 3)
+// ============================================================
+function showRecommendations() {
+    if (favorites.size === 0) {
+        addLog('Рекомендации', 'Добавьте посты в избранное');
+        alert('Сначала добавьте посты в избранное!');
+        return;
+    }
+
+    const favTags = new Set();
+    favorites.forEach(id => {
+        const post = postsMap.get(id);
+        if (post) post.tags.forEach(tag => favTags.add(tag));
+    });
+
+    const recommendations = posts.filter(post =>
+        !favorites.has(post.id) &&
+        post.tags.some(tag => favTags.has(tag))
+    );
+
+    if (recommendations.length === 0) {
+        addLog('Рекомендации', 'Ничего не найдено');
+        alert('Похожих постов не найдено');
+        return;
+    }
+
+    currentDisplayPosts = recommendations;
+    renderPosts(recommendations);
+    addLog('Рекомендации', `Найдено ${recommendations.length} постов`);
+}
+
+// ============================================================
+// 11. ЭКСПОРТ (Задание 4)
+// ============================================================
+function exportState() {
+    const state = {
+        favorites: [...favorites],
+        totalPosts: posts.length,
+        exportDate: new Date().toISOString()
+    };
+    const jsonStr = JSON.stringify(state, null, 2);
+
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `blog-state-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    addLog('Экспорт', `Сохранено в файл (${favorites.size} избранных)`);
+}
+
+// ============================================================
+// 12. LOCALSTORAGE
+// ============================================================
+function saveFavoritesToStorage() {
+    const arr = [...favorites];
+    localStorage.setItem('favorites', JSON.stringify(arr));
+}
+
+function loadFavoritesFromStorage() {
+    const saved = localStorage.getItem('favorites');
+    if (saved) {
+        try {
+            const arr = JSON.parse(saved);
+            favorites.clear();
+            arr.forEach(id => favorites.add(id));
+            updateFavCount();
+        } catch (e) {
+            console.error('Ошибка загрузки избранного:', e);
+        }
+    }
+}
+
+// ============================================================
+// 13. СБРОС
+// ============================================================
+function resetAll() {
+    posts = [];
+    postsMap.clear();
+    favorites.clear();
+    actionLog.length = 0;
+    currentDisplayPosts = [];
+
+    document.getElementById('postsContainer').innerHTML =
+        '<div class="empty-state">Нажмите «Загрузить посты»</div>';
+    document.getElementById('tagStats').innerHTML = '—';
+    document.getElementById('authorFilter').innerHTML = '<option value="">Все авторы</option>';
+    document.getElementById('categoryFilter').innerHTML = '<option value="">Все категории</option>';
+    document.getElementById('searchInput').value = '';
+    updateFavCount();
+    renderLog();
+    localStorage.removeItem('favorites');
+
+    addLog('Сброс', 'Все данные очищены');
+}
+
+// ============================================================
+// 14. ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+loadFavoritesFromStorage();
+loadPosts();
+
+console.log('✅ ПР16 загружено');
+</script>
+</body>
+</html>

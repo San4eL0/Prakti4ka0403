@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "Hello World Extension",
+    "version": "1.0",
+    "description": "Простое расширение: показывает приветствие и меняет фон страницы",
+    "icons": {
+        "48": "icons/icon-48.png"
+    },
+    "browser_action": {
+        "default_icon": "icons/icon-48.png",
+        "default_title": "Hello World",
+        "default_popup": "popup/popup.html"
+    },
+    "permissions": [
+        "activeTab",
+        "storage"
+    ]
+}

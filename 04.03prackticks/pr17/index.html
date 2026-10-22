@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ПР17 — Инкапсуляция. Приватные переменные</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { text-align: center; color: white; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 30px; }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .card p { color: #555; font-size: 14px; margin-bottom: 10px; }
+
+        .counter-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: 0.2s;
+            background: #667eea;
+            color: white;
+        }
+        button:hover { background: #5a67d8; transform: translateY(-2px); }
+        button.green { background: #27ae60; }
+        button.green:hover { background: #229954; }
+        button.red { background: #e74c3c; }
+        button.red:hover { background: #c0392b; }
+        button.gray { background: #95a5a6; }
+        button.gray:hover { background: #7f8c8d; }
+
+        .info-box {
+            background: #f0f4f8;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            margin-top: 15px;
+            color: #2c3e50;
+            white-space: pre-wrap;
+        }
+        .info-box.success { border-left-color: #27ae60; background: #eafaf1; }
+        .info-box.warning { border-left-color: #f39c12; background: #fef9e7; }
+        .info-box.error { border-left-color: #e74c3c; background: #fdedec; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+
+        .highlight { background: #ffeaa7; padding: 1px 6px; border-radius: 4px; color: #d35400; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔒 Инкапсуляция в JavaScript</h1>
+    <p class="subtitle">Приватные переменные через замыкания · Паттерн «Модуль»</p>
+
+    <!-- 1. Базовый счётчик -->
+    <div class="card">
+        <h2>1. Базовый счётчик с приватной переменной</h2>
+        <p>Переменная <code>count</code> недоступна снаружи — только через методы.</p>
+
+        <div class="counter-display" id="counter1Display">0</div>
+
+        <div class="btn-group">
+            <button class="green" onclick="counter1.increment()">+1</button>
+            <button class="red" onclick="counter1.decrement()">−1</button>
+            <button class="gray" onclick="counter1.reset()">Сброс</button>
+            <button onclick="showCounter1Info()">ℹ Показать состояние</button>
+        </div>
+
+        <div class="info-box" id="counter1Info">
+            Нажмите кнопку, чтобы увидеть состояние счётчика
+        </div>
+    </div>
+
+    <!-- 2. Доказательство изоляции -->
+    <div class="card">
+        <h2>2. Доказательство изоляции экземпляров</h2>
+        <p>Два независимых счётчика. Изменение одного не влияет на другой.</p>
+
+        <div class="grid-2">
+            <div>
+                <h3 style="text-align:center;margin-bottom:10px;">Счётчик A</h3>
+                <div class="counter-display" id="counterADisplay">0</div>
+                <div class="btn-group">
+                    <button class="green" onclick="counterA.increment()">+1</button>
+                    <button class="red" onclick="counterA.decrement()">−1</button>
+                </div>
+            </div>
+            <div>
+                <h3 style="text-align:center;margin-bottom:10px;">Счётчик B</h3>
+                <div class="counter-display" id="counterBDisplay">0</div>
+                <div class="btn-group">
+                    <button class="green" onclick="counterB.increment()">+1</button>
+                    <button class="red" onclick="counterB.decrement()">−1</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box" id="isolationInfo">
+            Оба счётчика независимы: у каждого своё состояние
+        </div>
+    </div>
+
+    <!-- 3. Проверка приватности -->
+    <div class="card">
+        <h2>3. Проверка приватности</h2>
+        <p>Попробуйте обратиться к приватной переменной напрямую:</p>
+
+        <div class="btn-group">
+            <button onclick="tryDirectAccess()">🔓 Попробовать counter1.count</button>
+        </div>
+
+        <div class="info-box" id="accessInfo">
+            Нажмите кнопку, чтобы проверить доступ
+        </div>
+    </div>
+
+    <!-- 4. Ограниченный счётчик (Задание) -->
+    <div class="card">
+        <h2>4. Ограниченный счётчик (min = 0, max = 5)</h2>
+        <p>Счётчик, который не выходит за пределы диапазона.</p>
+
+        <div class="counter-display" id="boundedDisplay">0</div>
+
+        <div class="btn-group">
+            <button class="green" onclick="bounded.increment()">+1</button>
+            <button class="red" onclick="bounded.decrement()">−1</button>
+            <button class="gray" onclick="bounded.reset()">Сброс до min</button>
+            <button onclick="showBoundedInfo()">ℹ Диапазон</button>
+        </div>
+
+        <div class="info-box" id="boundedInfo">
+            Нажмите, чтобы увидеть { min, max, current }
+        </div>
+    </div>
+
+    <!-- 5. Проверка ошибки при неверном диапазоне -->
+    <div class="card">
+        <h2>5. Проверка валидации при создании</h2>
+        <p>Попробуйте создать счётчик с <code>min = 5, max = 0</code>:</p>
+
+        <div class="btn-group">
+            <button onclick="tryInvalidCounter()">⚠ Создать невалидный счётчик</button>
+        </div>
+
+        <div class="info-box" id="invalidInfo">
+            Должна быть выброшена ошибка
+        </div>
+    </div>
+
+    <!-- 6. Цепочка вызовов -->
+    <div class="card">
+        <h2>6. Цепочка вызовов (method chaining)</h2>
+        <p>Методы возвращают <code>this</code>, поэтому можно вызывать подряд:</p>
+
+        <div class="counter-display" id="chainDisplay">0</div>
+
+        <div class="btn-group">
+            <button onclick="runChainDemo()">▶ increment().increment().increment().decrement()</button>
+            <button class="gray" onclick="chainCounter.reset()">Сброс</button>
+        </div>
+
+        <div class="info-box" id="chainInfo">
+            Нажмите «Запустить», чтобы увидеть цепочку
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. БАЗОВЫЙ СЧЁТЧИК (замыкание)
+// ============================================================
+function createCounter() {
+    // ===== ПРИВАТНАЯ ЗОНА =====
+    let count = 0;
+
+    function logChange(operation) {
+        console.log(`${new Date().toLocaleTimeString()} ${operation}: ${count}`);
+    }
+
+    // ===== ПУБЛИЧНЫЙ API =====
+    return {
+        increment: function() {
+            count++;
+            logChange('INCREMENT');
+            updateCounter1Display();
+            return this;
+        },
+        decrement: function() {
+            if (count > 0) {
+                count--;
+                logChange('DECREMENT');
+            } else {
+                console.warn('Нельзя уменьшить: счётчик уже 0');
+            }
+            updateCounter1Display();
+            return this;
+        },
+        getValue: function() {
+            return count;
+        },
+        reset: function() {
+            count = 0;
+            logChange('RESET');
+            updateCounter1Display();
+            return this;
+        }
+    };
+}
+
+const counter1 = createCounter();
+
+function updateCounter1Display() {
+    document.getElementById('counter1Display').textContent = counter1.getValue();
+}
+
+function showCounter1Info() {
+    const info = document.getElementById('counter1Info');
+    info.className = 'info-box success';
+    info.textContent = `counter1.getValue() = ${counter1.getValue()}
+typeof counter1.count = ${typeof counter1.count}
+counter1.count = ${counter1.count}
+Прямой доступ к приватной переменной невозможен!`;
+}
+
+// ============================================================
+// 2. ИЗОЛЯЦИЯ ЭКЗЕМПЛЯРОВ
+// ============================================================
+const counterA = createCounter();
+const counterB = createCounter();
+
+// Обёртки для отображения
+const originalIncrementA = counterA.increment;
+counterA.increment = function() {
+    const result = originalIncrementA.call(this);
+    document.getElementById('counterADisplay').textContent = this.getValue();
+    updateIsolationInfo();
+    return result;
+};
+
+const originalDecrementA = counterA.decrement;
+counterA.decrement = function() {
+    const result = originalDecrementA.call(this);
+    document.getElementById('counterADisplay').textContent = this.getValue();
+    updateIsolationInfo();
+    return result;
+};
+
+const originalIncrementB = counterB.increment;
+counterB.increment = function() {
+    const result = originalIncrementB.call(this);
+    document.getElementById('counterBDisplay').textContent = this.getValue();
+    updateIsolationInfo();
+    return result;
+};
+
+const originalDecrementB = counterB.decrement;
+counterB.decrement = function() {
+    const result = originalDecrementB.call(this);
+    document.getElementById('counterBDisplay').textContent = this.getValue();
+    updateIsolationInfo();
+    return result;
+};
+
+function updateIsolationInfo() {
+    const info = document.getElementById('isolationInfo');
+    info.className = 'info-box';
+    info.textContent = `counterA.getValue() = ${counterA.getValue()}
+counterB.getValue() = ${counterB.getValue()}
+
+Каждый вызов createCounter() создаёт новый экземпляр с собственным count.`;
+}
+
+// ============================================================
+// 3. ПРОВЕРКА ПРИВАТНОСТИ
+// ============================================================
+function tryDirectAccess() {
+    const info = document.getElementById('accessInfo');
+    const directValue = counter1.count;
+
+    if (directValue === undefined) {
+        info.className = 'info-box success';
+        info.textContent = `✅ counter1.count = ${directValue}
+Прямого доступа нет! Переменная count скрыта в замыкании.
+Доступ возможен только через counter1.getValue() = ${counter1.getValue()}`;
+    } else {
+        info.className = 'info-box error';
+        info.textContent = `❌ counter1.count = ${directValue} (приватность нарушена!)`;
+    }
+}
+
+// ============================================================
+// 4. ОГРАНИЧЕННЫЙ СЧЁТЧИК (Задание из документа)
+// ============================================================
+function createBoundedCounter(min, max) {
+    if (min > max) {
+        throw new Error(`Неверный диапазон: min (${min}) больше max (${max})`);
+    }
+    if (min === max) {
+        console.warn('min и max равны — счётчик не будет меняться');
+    }
+
+    let count = min;
+
+    return {
+        increment: function() {
+            if (count < max) {
+                count++;
+                console.log(`INCREMENT: ${count}`);
+            } else {
+                console.warn(`Достигнут максимум: ${max}`);
+            }
+            updateBoundedDisplay();
+            return this;
+        },
+        decrement: function() {
+            if (count > min) {
+                count--;
+                console.log(`DECREMENT: ${count}`);
+            } else {
+                console.warn(`Достигнут минимум: ${min}`);
+            }
+            updateBoundedDisplay();
+            return this;
+        },
+        getValue: function() {
+            return count;
+        },
+        reset: function() {
+            count = min;
+            console.log(`RESET: ${count}`);
+            updateBoundedDisplay();
+            return this;
+        },
+        getRange: function() {
+            return { min, max, current: count };
+        }
+    };
+}
+
+const bounded = createBoundedCounter(0, 5);
+
+function updateBoundedDisplay() {
+    document.getElementById('boundedDisplay').textContent = bounded.getValue();
+}
+
+function showBoundedInfo() {
+    const range = bounded.getRange();
+    const info = document.getElementById('boundedInfo');
+    info.className = 'info-box';
+    info.textContent = `getRange() = {
+    min: ${range.min},
+    max: ${range.max},
+    current: ${range.current}
+}`;
+}
+
+// ============================================================
+// 5. ПРОВЕРКА ВАЛИДАЦИИ
+// ============================================================
+function tryInvalidCounter() {
+    const info = document.getElementById('invalidInfo');
+    try {
+        const invalid = createBoundedCounter(5, 0);
+        info.className = 'info-box error';
+        info.textContent = '❌ Ошибка не была выброшена!';
+    } catch (error) {
+        info.className = 'info-box success';
+        info.textContent = `✅ Ошибка поймана:
+${error.message}`;
+    }
+}
+
+// ============================================================
+// 6. ЦЕПОЧКА ВЫЗОВОВ
+// ============================================================
+const chainCounter = createCounter();
+
+function runChainDemo() {
+    chainCounter.increment().increment().increment().decrement();
+    document.getElementById('chainDisplay').textContent = chainCounter.getValue();
+
+    const info = document.getElementById('chainInfo');
+    info.className = 'info-box success';
+    info.textContent = `Результат: ${chainCounter.getValue()}
+(3 инкремента, 1 декремент → 2)
+
+Каждый метод возвращает this, поэтому можно вызывать подряд.`;
+}
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+console.log('=== ПР17: Инкапсуляция ===');
+console.log('counter1.getValue() =', counter1.getValue());
+console.log('counter1.count =', counter1.count); // undefined
+console.log('counterA.getValue() =', counterA.getValue());
+console.log('counterB.getValue() =', counterB.getValue());
+console.log('bounded.getRange() =', bounded.getRange());
+
+// Первичная отрисовка
+updateCounter1Display();
+document.getElementById('counterADisplay').textContent = counterA.getValue();
+document.getElementById('counterBDisplay').textContent = counterB.getValue();
+updateBoundedDisplay();
+document.getElementById('chainDisplay').textContent = chainCounter.getValue();
+</script>
+</body>
+</html>

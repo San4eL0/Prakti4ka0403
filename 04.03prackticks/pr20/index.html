@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПР20 — Форма кредитной карты</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #e0e5ec 0%, #c9d0df 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        h1 {
+            font-size: 24px;
+            color: #1a1a2e;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        /* ===== КАРТОЧКА ===== */
+        .card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 16px;
+            padding: 24px 20px 20px;
+            margin-bottom: 28px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            position: relative;
+            min-height: 210px;
+            transition: all 0.3s ease;
+        }
+        .card.visa { background: linear-gradient(135deg, #1a1f71 0%, #0d47a1 100%); }
+        .card.mastercard { background: linear-gradient(135deg, #eb001b 0%, #f79e1b 100%); }
+        .card.mir { background: linear-gradient(135deg, #00b8b8 0%, #008080 100%); }
+        .card.amex { background: linear-gradient(135deg, #006fcf 0%, #003d7a 100%); }
+        .card.discover { background: linear-gradient(135deg, #ff6b00 0%, #e65100 100%); }
+        .card.jcb { background: linear-gradient(135deg, #007b3d 0%, #004d20 100%); }
+        .card.unionpay { background: linear-gradient(135deg, #d52b1e 0%, #b71c1c 100%); }
+
+        .card-brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .brand-icon { font-size: 28px; }
+        .brand-name {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+        .card-number-display {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .card-holder { flex: 1; }
+        .card-expiry { flex: 0 0 80px; }
+        .card-bottom .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .card-bottom .value {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            min-height: 20px;
+        }
+
+        /* ===== ФОРМА ===== */
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e5ec;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f8f9fc;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a6cf7;
+            box-shadow: 0 0 0 3px rgba(74,108,247,0.15);
+            background: white;
+        }
+        .form-group input.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        .form-group input.error:focus {
+            box-shadow: 0 0 0 3px rgba(220,53,69,0.15);
+        }
+        .form-row { display: flex; gap: 16px; }
+        .form-group.half { flex: 1; }
+        .error-message {
+            display: block;
+            font-size: 12px;
+            color: #dc3545;
+            min-height: 18px;
+            margin-top: 3px;
+        }
+        #submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4a6cf7 0%, #6c5ce7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+        }
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74,108,247,0.35);
+        }
+        #submit-btn:active { transform: translateY(0); }
+        #submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 16px; }
+            .card { padding: 18px 16px 16px; min-height: 180px; }
+            .card-number-display { font-size: 18px; letter-spacing: 2px; }
+            .form-row { flex-direction: column; gap: 0; }
+            .form-group input { font-size: 14px; padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>💳 Оплата картой</h1>
+
+    <!-- Карточка -->
+    <div class="card" id="card">
+        <div class="card-brand">
+            <span class="brand-icon" id="brand-icon">💳</span>
+            <span class="brand-name" id="brand-name">Банковская карта</span>
+        </div>
+        <div class="card-number-display" id="card-number-display">
+            •••• •••• •••• ••••
+        </div>
+        <div class="card-bottom">
+            <div class="card-holder">
+                <div class="label">Владелец</div>
+                <div class="value" id="card-holder-display">ИМЯ ФАМИЛИЯ</div>
+            </div>
+            <div class="card-expiry">
+                <div class="label">Срок</div>
+                <div class="value" id="card-expiry-display">MM/YY</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма -->
+    <form id="card-form">
+        <div class="form-group">
+            <label for="card-number">Номер карты</label>
+            <input type="text" id="card-number" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number" inputmode="numeric">
+            <span class="error-message" id="number-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="card-holder">Владелец карты</label>
+            <input type="text" id="card-holder" placeholder="IVAN PETROV" autocomplete="cc-name">
+            <span class="error-message" id="holder-error"></span>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                <label for="card-expiry">Срок действия</label>
+                <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" inputmode="numeric">
+                <span class="error-message" id="expiry-error"></span>
+            </div>
+            <div class="form-group half">
+                <label for="card-cvv">CVV/CVC</label>
+                <input type="text" id="card-cvv" placeholder="•••" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+                <span class="error-message" id="cvv-error"></span>
+            </div>
+        </div>
+
+        <button type="submit" id="submit-btn">Оплатить</button>
+    </form>
+
+    <div class="success-message" id="success-message">
+        ✅ Оплата успешно выполнена!
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. ЭЛЕМЕНТЫ
+// ============================================================
+const cardElement = document.getElementById('card');
+const cardNumberInput = document.getElementById('card-number');
+const cardHolderInput = document.getElementById('card-holder');
+const cardExpiryInput = document.getElementById('card-expiry');
+const cardCvvInput = document.getElementById('card-cvv');
+
+const cardNumberDisplay = document.getElementById('card-number-display');
+const cardHolderDisplay = document.getElementById('card-holder-display');
+const cardExpiryDisplay = document.getElementById('card-expiry-display');
+const brandIcon = document.getElementById('brand-icon');
+const brandName = document.getElementById('brand-name');
+
+const numberError = document.getElementById('number-error');
+const holderError = document.getElementById('holder-error');
+const expiryError = document.getElementById('expiry-error');
+const cvvError = document.getElementById('cvv-error');
+
+const submitBtn = document.getElementById('submit-btn');
+const successMessage = document.getElementById('success-message');
+
+// ============================================================
+// 2. ФОРМАТИРОВАНИЕ
+// ============================================================
+function formatCardNumber(value) {
+    const cleaned = value.replace(/\D/g, '');
+    const groups = [];
+    for (let i = 0; i < cleaned.length; i += 4) {
+        groups.push(cleaned.slice(i, i + 4));
+    }
+    return groups.join(' ').slice(0, 19);
+}
+
+function formatCardExpiry(value) {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 0) return '';
+
+    let month = cleaned.slice(0, 2);
+    if (month.length === 2 && parseInt(month) > 12) {
+        month = '12';
+    }
+    if (cleaned.length >= 2) {
+        return month + '/' + cleaned.slice(2, 4);
+    }
+    return month;
+}
+
+function formatCVV(value, cardType) {
+    const cleaned = value.replace(/\D/g, '');
+    const maxLength = cardType === 'amex' ? 4 : 3;
+    return cleaned.slice(0, maxLength);
+}
+
+// ============================================================
+// 3. ОПРЕДЕЛЕНИЕ ТИПА КАРТЫ
+// ============================================================
+function getCardType(number) {
+    const clean = number.replace(/\s/g, '');
+    if (!clean) return 'unknown';
+
+    const first = clean[0];
+    const firstTwo = clean.slice(0, 2);
+    const firstFour = clean.slice(0, 4);
+
+    // American Express
+    if (firstTwo === '34' || firstTwo === '37') return 'amex';
+    // Visa
+    if (first === '4') return 'visa';
+    // MasterCard
+    if (firstTwo >= '51' && firstTwo <= '55') return 'mastercard';
+    if (firstTwo >= '22' && firstTwo <= '27') return 'mastercard';
+    // UnionPay (Задание 1)
+    if (firstTwo === '62') return 'unionpay';
+    // Мир
+    if (first === '2') return 'mir';
+    // Discover
+    if (firstFour === '6011' || firstTwo === '65') return 'discover';
+    // JCB
+    if (firstTwo === '35') return 'jcb';
+
+    return 'unknown';
+}
+
+function getCardInfo(type) {
+    const info = {
+        visa: { icon: '💳', name: 'Visa' },
+        mastercard: { icon: '💳', name: 'MasterCard' },
+        mir: { icon: '💳', name: 'МИР' },
+        amex: { icon: '💳', name: 'American Express' },
+        discover: { icon: '💳', name: 'Discover' },
+        jcb: { icon: '💳', name: 'JCB' },
+        unionpay: { icon: '💳', name: 'UnionPay' },
+        unknown: { icon: '💳', name: 'Банковская карта' }
+    };
+    return info[type] || info.unknown;
+}
+
+// ============================================================
+// 4. ВАЛИДАЦИЯ
+// ============================================================
+function validateLuhn(number) {
+    const digits = number.replace(/\s/g, '').split('').map(Number);
+    if (digits.length < 13) return false;
+
+    let sum = 0;
+    let isEven = false;
+
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = digits[i];
+        if (isEven) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        isEven = !isEven;
+    }
+
+    return sum % 10 === 0;
+}
+
+function validateCardNumber(value) {
+    const clean = value.replace(/\s/g, '');
+    if (clean.length === 0) return { valid: false, message: 'Введите номер карты' };
+    if (clean.length < 13) return { valid: false, message: 'Номер слишком короткий' };
+    if (clean.length > 16) return { valid: false, message: 'Номер слишком длинный' };
+    if (!validateLuhn(clean)) return { valid: false, message: 'Неверный номер карты' };
+    return { valid: true, message: '' };
+}
+
+function validateCardHolder(value) {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return { valid: false, message: 'Введите имя владельца' };
+    if (trimmed.length < 3) return { valid: false, message: 'Имя слишком короткое' };
+    if (!/^[A-Za-zА-Яа-яЁё\s-]+$/.test(trimmed)) {
+        return { valid: false, message: 'Используйте только буквы' };
+    }
+    return { valid: true, message: '' };
+}
+
+function validateCardExpiry(value) {
+    const clean = value.replace('/', '');
+    if (clean.length === 0) return { valid: false, message: 'Введите срок действия' };
+    if (clean.length < 4) return { valid: false, message: 'Введите полную дату (MM/YY)' };
+
+    const month = parseInt(clean.slice(0, 2));
+    const year = parseInt(clean.slice(2, 4));
+
+    if (month < 1 || month > 12) return { valid: false, message: 'Неверный месяц' };
+
+    const now = new Date();
+    const currentYear = now.getFullYear() % 100;
+    const currentMonth = now.getMonth() + 1;
+
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        return { valid: false, message: 'Карта просрочена' };
+    }
+
+    return { valid: true, message: '' };
+}
+
+function validateCVV(value, cardType) {
+    const clean = value.replace(/\D/g, '');
+    const maxLength = cardType === 'amex' ? 4 : 3;
+    const minLength = cardType === 'amex' ? 4 : 3;
+
+    if (clean.length === 0) return { valid: false, message: 'Введите CVV' };
+    if (clean.length < minLength) {
+        return { valid: false, message: `Введите ${minLength} цифры` };
+    }
+    if (clean.length > maxLength) {
+        return { valid: false, message: `Не более ${maxLength} цифр` };
+    }
+    return { valid: true, message: '' };
+}
+
+// ============================================================
+// 5. ОБНОВЛЕНИЕ КАРТОЧКИ
+// ============================================================
+function updateCard() {
+    const number = cardNumberInput.value;
+    const cardType = getCardType(number);
+    const info = getCardInfo(cardType);
+
+    // Обновляем класс для фона
+    cardElement.className = 'card';
+    if (cardType !== 'unknown') {
+        cardElement.classList.add(cardType);
+    }
+
+    // Бренд
+    brandIcon.textContent = info.icon;
+    brandName.textContent = info.name;
+
+    // Номер
+    const displayNumber = number || '•••• •••• •••• ••••';
+    cardNumberDisplay.textContent = displayNumber;
+
+    // Владелец
+    const holder = cardHolderInput.value.trim().toUpperCase() || 'ИМЯ ФАМИЛИЯ';
+    cardHolderDisplay.textContent = holder;
+
+    // Срок
+    const expiry = cardExpiryInput.value || 'MM/YY';
+    cardExpiryDisplay.textContent = expiry;
+
+    // CVV maxlength
+    const cvvMaxLength = cardType === 'amex' ? 4 : 3;
+    cardCvvInput.maxLength = cvvMaxLength;
+    cardCvvInput.placeholder = '•'.repeat(cvvMaxLength);
+}
+
+// ============================================================
+// 6. ОБРАБОТЧИКИ
+// ============================================================
+
+// Номер карты
+cardNumberInput.addEventListener('input', function() {
+    const formatted = formatCardNumber(this.value);
+    this.value = formatted;
+
+    const result = validateCardNumber(formatted);
+    numberError.textContent = result.message;
+    this.classList.toggle('error', !result.valid && formatted.length > 0);
+
+    updateCard();
+
+    // Задание 3: автопереход при заполнении (после 19 символов)
+    if (formatted.length === 19) {
+        cardHolderInput.focus();
+    }
+});
+
+// Владелец
+cardHolderInput.addEventListener('input', function() {
+    // Только буквы, пробелы и дефисы; в верхнем регистре
+    this.value = this.value.toUpperCase().replace(/[^A-ZА-ЯЁ\s-]/g, '');
+
+    const result = validateCardHolder(this.value);
+    holderError.textContent = result.message;
+    this.classList.toggle('error', !result.valid && this.value.length > 0);
+
+    updateCard();
+});
+
+// Срок действия
+cardExpiryInput.addEventListener('input', function() {
+    const formatted = formatCardExpiry(this.value);
+    this.value = formatted;
+
+    const result = validateCardExpiry(formatted);
+    expiryError.textContent = result.message;
+    this.classList.toggle('error', !result.valid && formatted.length > 0);
+
+    updateCard();
+});
+
+// CVV
+cardCvvInput.addEventListener('input', function() {
+    const cardType = getCardType(cardNumberInput.value);
+    const formatted = formatCVV(this.value, cardType);
+    this.value = formatted;
+
+    const result = validateCVV(formatted, cardType);
+    cvvError.textContent = result.message;
+    this.classList.toggle('error', !result.valid && formatted.length > 0);
+
+    updateCard();
+});
+
+// 3D-эффект при фокусе на CVV
+cardCvvInput.addEventListener('focus', function() {
+    cardElement.style.transform = 'rotateY(10deg)';
+});
+cardCvvInput.addEventListener('blur', function() {
+    cardElement.style.transform = 'rotateY(0)';
+});
+
+// Отправка формы
+document.getElementById('card-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const number = cardNumberInput.value;
+    const holder = cardHolderInput.value;
+    const expiry = cardExpiryInput.value;
+    const cvv = cardCvvInput.value;
+    const cardType = getCardType(number);
+
+    const isNumberValid = validateCardNumber(number).valid;
+    const isHolderValid = validateCardHolder(holder).valid;
+    const isExpiryValid = validateCardExpiry(expiry).valid;
+    const isCvvValid = validateCVV(cvv, cardType).valid;
+
+    if (isNumberValid && isHolderValid && isExpiryValid && isCvvValid) {
+        submitBtn.disabled = true;
+        successMessage.classList.add('show');
+
+        setTimeout(() => {
+            this.reset();
+            successMessage.classList.remove('show');
+            submitBtn.disabled = false;
+            updateCard();
+        }, 3000);
+    } else {
+        if (!isNumberValid) cardNumberInput.focus();
+        else if (!isHolderValid) cardHolderInput.focus();
+        else if (!isExpiryValid) cardExpiryInput.focus();
+        else if (!isCvvValid) cardCvvInput.focus();
+    }
+});
+
+// ============================================================
+// 7. ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+updateCard();
+
+console.log('✅ ПР20: Форма карты загружена');
+console.log('Тестовые номера (проходят Луна):');
+console.log('  Visa: 4111 1111 1111 1111');
+console.log('  MasterCard: 5555 5555 5555 4444');
+console.log('  Mir: 2200 0000 0000 0004');
+console.log('  Amex: 3782 822463 10005');
+</script>
+</body>
+</html>

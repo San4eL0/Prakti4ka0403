@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПР19 — Чат-бот</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            width: 420px;
+            max-width: 95%;
+            height: 600px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-header h2 { font-size: 18px; font-weight: 600; }
+        .status { font-size: 13px; opacity: 0.9; }
+
+        .chat-messages {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            animation: messageAppear 0.3s ease;
+        }
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message { align-self: flex-end; }
+        .bot-message { align-self: flex-start; }
+        .message-content {
+            padding: 10px 16px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+        .user-message .message-time { text-align: right; }
+
+        .typing-indicator {
+            display: none;
+            padding: 8px 20px;
+            align-self: flex-start;
+            gap: 4px;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 12px 20px;
+            background: white;
+            border-top: 1px solid #e9eef5;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #e9eef5;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .chat-input-area input:focus { border-color: #667eea; }
+        .chat-input-area input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .chat-input-area button {
+            width: 46px;
+            height: 46px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .chat-input-area button:hover { transform: scale(1.05); }
+        .chat-input-area button:active { transform: scale(0.95); }
+        .chat-input-area button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>🤖 Чат-бот</h2>
+        <span class="status">● Онлайн</span>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="message bot-message">
+            <div class="message-content">
+                Привет! Я простой чат-бот. Напиши что-нибудь, и я отвечу!
+            </div>
+            <div class="message-time">Только что</div>
+        </div>
+    </div>
+    <div class="typing-indicator" id="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="message-input" placeholder="Введите сообщение..." autofocus>
+        <button id="send-button">➤</button>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. ЭЛЕМЕНТЫ
+// ============================================================
+const chatMessages = document.getElementById('chat-messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const typingIndicator = document.getElementById('typing-indicator');
+
+// ============================================================
+// 2. ЛОГИКА БОТА
+// ============================================================
+const botResponses = {
+    'привет': [
+        'Привет! Как у тебя дела? 😊',
+        'Здравствуй! Рад тебя видеть! 😊',
+        'Привет-привет! Чем могу помочь? 😊'
+    ],
+    'как дела': [
+        'У меня всё отлично! А у тебя? 😊',
+        'Прекрасно! Спасибо, что спросил! 😊',
+        'Всё супер! Я здесь, чтобы общаться с тобой! 😊'
+    ],
+    'как тебя зовут': [
+        'Меня зовут Бот-помощник! 😊',
+        'Я твой виртуальный друг! Называй меня просто Бот! 😊'
+    ],
+    'имя': [
+        'Меня зовут Бот! А тебя? 😊',
+        'Я безымянный бот! Можешь придумать мне имя! 🐣'
+    ],
+    'возраст': [
+        'Мне пару строк кода! Возраст не важен 😊',
+        'Я существую с момента загрузки страницы! ⏰'
+    ],
+    'кто ты': [
+        'Я простой чат-бот, созданный для общения! 😊',
+        'Я твой помощник и собеседник! Чем могу быть полезен? 😊'
+    ],
+    'погода': [
+        'К сожалению, я не знаю погоду. Но выгляни в окно! 😊',
+        'Погода — это загадка! А что у тебя за окном? 😊'
+    ],
+    'спасибо': [
+        'Пожалуйста! Рад помочь! 😊',
+        'Всегда пожалуйста! Обращайся! 😊',
+        'Не за что! Мне в радость! 😊'
+    ],
+    'пока': [
+        'Пока! Рад был пообщаться! 👋',
+        'До встречи! Приходи ещё! ☺️',
+        'Всего доброго! Был рад поговорить! 👋'
+    ],
+    'день рождения': [
+        'С днём рождения! 🎉🎂🎈',
+        'Поздравляю! Желаю счастья и здоровья! 🎉'
+    ],
+    'помощь': [
+        'Я могу ответить на простые вопросы. Попробуй спросить:\n- Привет\n- Как дела?\n- Как тебя зовут?\n- День рождения\n- Пока',
+        'Вот что я умею:\n- Отвечать на приветствия\n- Поддерживать беседу\n- Прощаться\n- Считать простые выражения'
+    ]
+};
+
+const defaultResponses = [
+    'Интересно... Расскажи ещё! 😊',
+    'Я не совсем понял. Попробуй сказать по-другому! 🤔',
+    'Хм... Давай поговорим о чём-то другом? 😊',
+    'Извини, я не знаю ответа. Может, спросишь что-то ещё? 🤔',
+    'Я тебя слышу! Но пока не знаю, что ответить... 🙃'
+];
+
+function getRandomItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+// ============================================================
+// 3. КАЛЬКУЛЯТОР (Задание 5)
+// ============================================================
+function tryCalculate(msg) {
+    // Проверяем, есть ли математические операторы
+    if (!/[+\-*/]/.test(msg)) return null;
+
+    // Разрешаем только цифры, пробелы и операторы
+    if (!/^[\d\s+\-*/().]+$/.test(msg)) return null;
+
+    try {
+        // Безопасное вычисление
+        const result = Function(`"use strict"; return (${msg})`)();
+        if (typeof result === 'number' && isFinite(result)) {
+            return `Результат: ${msg} = ${result}`;
+        }
+    } catch (e) {
+        return 'Не могу вычислить это выражение. Попробуй что-то проще! 🤔';
+    }
+    return null;
+}
+
+// ============================================================
+// 4. ПОЛУЧЕНИЕ ОТВЕТА
+// ============================================================
+let messageCount = 0;
+
+function getBotResponse(userMessage) {
+    const msg = userMessage.toLowerCase().trim();
+
+    // Сначала проверяем на калькулятор
+    const calcResult = tryCalculate(userMessage);
+    if (calcResult) return calcResult;
+
+    // Затем — ключевые слова
+    for (const [keyword, responses] of Object.entries(botResponses)) {
+        if (msg.includes(keyword)) {
+            return getRandomItem(responses);
+        }
+    }
+
+    return getRandomItem(defaultResponses);
+}
+
+// ============================================================
+// 5. РАБОТА С ИНТЕРФЕЙСОМ
+// ============================================================
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function addMessage(text, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.textContent = text; // textContent защищает от XSS
+
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'message-time';
+    timeDiv.textContent = getCurrentTime();
+
+    messageDiv.appendChild(contentDiv);
+    messageDiv.appendChild(timeDiv);
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    saveHistory();
+}
+
+function showTyping(show) {
+    typingIndicator.style.display = show ? 'flex' : 'none';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ============================================================
+// 6. ОТПРАВКА СООБЩЕНИЯ
+// ============================================================
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (text === '') return;
+
+    messageCount++;
+
+    addMessage(text, 'user');
+    messageInput.value = '';
+    messageInput.focus();
+
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+
+    showTyping(true);
+
+    const delay = 500 + Math.random() * 1000;
+
+    setTimeout(() => {
+        const response = getBotResponse(text);
+        showTyping(false);
+
+        // Счётчик сообщений (Задание 3)
+        const fullResponse = `${response}\n\n(Сообщение #${messageCount})`;
+        addMessage(fullResponse, 'bot');
+
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        messageInput.focus();
+    }, delay);
+}
+
+// ============================================================
+// 7. ИСТОРИЯ В LOCALSTORAGE (Задание 6)
+// ============================================================
+function saveHistory() {
+    const messages = [];
+    document.querySelectorAll('.message').forEach(el => {
+        const content = el.querySelector('.message-content')?.textContent || '';
+        const time = el.querySelector('.message-time')?.textContent || '';
+        const sender = el.classList.contains('user-message') ? 'user' : 'bot';
+        messages.push({ sender, content, time });
+    });
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+}
+
+function loadHistory() {
+    const saved = localStorage.getItem('chatHistory');
+    if (!saved) return;
+
+    try {
+        const messages = JSON.parse(saved);
+        if (messages.length === 0) return;
+
+        // Очищаем стартовое сообщение, если есть история
+        chatMessages.innerHTML = '';
+
+        messages.forEach(m => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${m.sender}-message`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = m.content;
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = m.time;
+
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            chatMessages.appendChild(messageDiv);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        console.log(`Загружено ${messages.length} сообщений из истории`);
+    } catch (e) {
+        console.error('Ошибка загрузки истории:', e);
+    }
+}
+
+// ============================================================
+// 8. ОБРАБОТЧИКИ
+// ============================================================
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// ============================================================
+// 9. ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+messageInput.focus();
+loadHistory();
+
+// Приветствие, если истории нет
+setTimeout(() => {
+    if (chatMessages.children.length <= 1) {
+        addMessage('Привет! Я рад, что ты здесь! 😊', 'bot');
+    }
+}, 500);
+
+console.log('✅ ПР19: Чат-бот загружен');
+</script>
+</body>
+</html>

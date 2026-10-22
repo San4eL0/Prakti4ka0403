@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div id="popup-content">
+        <h2>👋 ПРИВЕТ!</h2>
+        <button id="hello-btn">Сказать "Hello World!"</button>
+        <button id="color-btn" class="blue">Синий фон</button>
+        <button id="font-up-btn" class="orange">A+ Увеличить шрифт</button>
+        <button id="font-down-btn" class="orange">A− Уменьшить шрифт</button>
+        <button id="dark-btn" class="dark">🌙 Тёмный режим</button>
+        <button id="reset-btn" class="gray">↺ Сбросить всё</button>
+        <div id="counter-line">
+            Кликов "Hello": <strong id="hello-count">0</strong>
+        </div>
+    </div>
+    <div id="error-content" class="hidden">
+        <p>Не удалось выполнить действие на этой странице</p>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
