@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ПР09 — Обработка событий</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.96);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 25px; }
+        h2 {
+            color: #4a4a4a;
+            margin: 25px 0 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        @media (max-width: 768px) { .row { grid-template-columns: 1fr; } }
+        .card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .card h3 { color: #333; margin-bottom: 15px; font-size: 16px; }
+
+        .counter-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
+            margin: 4px;
+        }
+        button:hover { background: #5a67d8; transform: scale(1.02); }
+        button.red { background: #e74c3c; }
+        button.green { background: #27ae60; }
+        button.orange { background: #f39c12; }
+        button.gray { background: #95a5a6; }
+
+        .color-box {
+            width: 120px;
+            height: 120px;
+            background: #3498db;
+            border-radius: 12px;
+            transition: background 0.3s;
+            margin: 10px auto;
+        }
+
+        .mouse-coords {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 16px;
+            min-height: 60px;
+        }
+        .click-box {
+            background: #4CAF50;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 10px;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .key-press-display {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.4em;
+            min-height: 60px;
+        }
+
+        .input-group { display: flex; gap: 10px; margin: 10px 0; }
+        .input-group input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .input-group input:focus { border-color: #667eea; outline: none; }
+
+        .task-list { list-style: none; padding: 0; }
+        .task-list li {
+            background: white;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-list li:hover { background: #e8f0fe; }
+        .task-list li.done {
+            border-left-color: #4CAF50;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .task-list li .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .delegation-list { list-style: none; padding: 0; }
+        .delegation-list li {
+            background: #ecf0f1;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .delegation-list li.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .toggle-switch {
+            width: 70px;
+            height: 34px;
+            background: #bdc3c7;
+            border-radius: 17px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 10px 0;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        .toggle-switch.active { background: #2ecc71; }
+        .toggle-switch.active::after { transform: translateX(36px); }
+
+        .log-area {
+            background: #2d2d2d;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .log-area p { margin: 2px 0; }
+        .log-area .ts { color: #888; margin-right: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎯 Практика по событиям JavaScript</h1>
+
+    <!-- РЯД 1: Клики и счётчики -->
+    <h2>1. Базовые события клика</h2>
+    <div class="row">
+        <div class="card">
+            <h3>🔢 Счётчик кликов</h3>
+            <div class="counter-display" id="clickCounter">0</div>
+            <button id="incrementBtn">+1 Нажми меня</button>
+            <button id="resetCounter" class="gray">Сброс</button>
+            <p style="margin-top:10px;color:#666;font-size:13px;">
+                Можно кликать и по самому числу
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🎨 Смена цвета по клику</h3>
+            <div class="color-box" id="colorBox"></div>
+            <button id="colorBtn" class="green">Сменить цвет</button>
+            <button id="resetColorBtn" class="gray">Сбросить</button>
+            <p style="margin-top:10px;color:#666;font-size:13px;">
+                Двойной клик по квадрату — случайный цвет
+            </p>
+        </div>
+    </div>
+
+    <!-- РЯД 2: Мышь и клавиатура -->
+    <h2>2. События мыши и клавиатуры</h2>
+    <div class="row">
+        <div class="card">
+            <h3>🖱 Координаты мыши</h3>
+            <div class="mouse-coords" id="mouseCoords">Наведи курсор на эту область</div>
+            <div class="click-box" id="clickArea">Кликни по мне</div>
+            <p id="clickTypeMessage" style="color:#666;font-style:italic;margin-top:10px;">
+                Ожидание клика...
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>⌨️ События клавиатуры</h3>
+            <p style="color:#666;font-size:14px;margin-bottom:10px;">Нажми любую клавишу</p>
+            <div class="key-press-display" id="keyDisplay">Ожидание нажатия...</div>
+            <p style="margin-top:10px;font-size:14px;color:#666;">
+                Последняя: <span id="lastKey">—</span>
+            </p>
+            <div style="margin-top:10px;">
+                <label style="font-size:14px;">
+                    <input type="checkbox" id="keyCaptureCheckbox">
+                    Захватывать клавиши в полях ввода
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- РЯД 3: Формы и делегирование -->
+    <h2>3. Формы и делегирование событий</h2>
+    <div class="row">
+        <div class="card">
+            <h3>📝 Список задач (To-Do)</h3>
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Новая задача...">
+                <button id="addTaskBtn" class="green">Добавить</button>
+            </div>
+            <ul class="task-list" id="taskList">
+                <li>Изучить события JavaScript <span class="delete-btn">×</span></li>
+                <li>Написать практическую работу <span class="delete-btn">×</span></li>
+                <li>Сделать перерыв ☕ <span class="delete-btn">×</span></li>
+            </ul>
+            <button id="clearTasksBtn" class="red">🗑 Очистить всё</button>
+        </div>
+
+        <div class="card">
+            <h3>🔀 Делегирование и toggle</h3>
+            <p style="color:#666;font-size:14px;margin-bottom:10px;">
+                Клик на элемент списка — подсветка
+            </p>
+            <ul class="delegation-list" id="delegationList">
+                <li>Элемент 1</li>
+                <li>Элемент 2</li>
+                <li>Элемент 3</li>
+            </ul>
+            <button id="addDelegationItem">+ Добавить элемент</button>
+
+            <div style="margin-top:15px;">
+                <div class="toggle-switch" id="toggleSwitch"></div>
+                <p id="toggleStatus" style="font-weight:bold;">Выключено</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Лог -->
+    <h2>📜 Лог событий</h2>
+    <div class="card">
+        <div class="log-area" id="eventLog">
+            <p><span class="ts">[система]</span> Готово к работе...</p>
+        </div>
+        <button id="clearLogBtn" class="gray" style="margin-top:10px;">Очистить лог</button>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================
+function addLog(message, type = 'info') {
+    const log = document.getElementById('eventLog');
+    const ts = new Date().toLocaleTimeString('ru-RU', { hour12: false });
+    const colors = {
+        info: '#00ff41',
+        warning: '#ffd700',
+        error: '#ff6b6b',
+        click: '#4fc3f7'
+    };
+    const p = document.createElement('p');
+    p.innerHTML = `<span class="ts">[${ts}]</span>${message}`;
+    p.style.color = colors[type] || colors.info;
+    log.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+
+    // Ограничим лог 100 записями
+    while (log.children.length > 100) log.removeChild(log.firstChild);
+}
+
+// ============================================================
+// 1. СЧЁТЧИК КЛИКОВ
+// ============================================================
+let counter = 0;
+const counterDisplay = document.getElementById('clickCounter');
+const incrementBtn = document.getElementById('incrementBtn');
+const resetCounterBtn = document.getElementById('resetCounter');
+
+incrementBtn.addEventListener('click', () => {
+    counter++;
+    counterDisplay.textContent = counter;
+    addLog(`Клик! Счётчик = ${counter}`, 'click');
+});
+
+resetCounterBtn.addEventListener('click', () => {
+    counter = 0;
+    counterDisplay.textContent = counter;
+    addLog('Счётчик сброшен', 'warning');
+});
+
+counterDisplay.addEventListener('click', () => {
+    counter++;
+    counterDisplay.textContent = counter;
+    addLog(`Клик по числу! Счётчик = ${counter}`, 'click');
+});
+
+// ============================================================
+// 2. СМЕНА ЦВЕТА
+// ============================================================
+const colorBox = document.getElementById('colorBox');
+const colorBtn = document.getElementById('colorBtn');
+const resetColorBtn = document.getElementById('resetColorBtn');
+
+const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+let colorIndex = 0;
+
+colorBtn.addEventListener('click', () => {
+    colorIndex = (colorIndex + 1) % colors.length;
+    colorBox.style.background = colors[colorIndex];
+    addLog(`Цвет изменён на ${colors[colorIndex]}`, 'info');
+});
+
+resetColorBtn.addEventListener('click', () => {
+    colorBox.style.background = '#3498db';
+    colorIndex = 0;
+    addLog('Цвет сброшен', 'warning');
+});
+
+colorBox.addEventListener('dblclick', () => {
+    const random = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    colorBox.style.background = random;
+    addLog(`Случайный цвет: ${random}`, 'info');
+});
+
+// ============================================================
+// 3. КООРДИНАТЫ МЫШИ
+// ============================================================
+const mouseCoords = document.getElementById('mouseCoords');
+const clickArea = document.getElementById('clickArea');
+const clickTypeMessage = document.getElementById('clickTypeMessage');
+
+mouseCoords.addEventListener('mousemove', (e) => {
+    const x = e.offsetX;
+    const y = e.offsetY;
+    mouseCoords.textContent = `X: ${x}px, Y: ${y}px (относительно блока)`;
+});
+
+clickArea.addEventListener('click', (e) => {
+    const button = e.button === 0 ? 'левая' : e.button === 2 ? 'правая' : 'средняя';
+    clickTypeMessage.textContent = `✅ Одиночный клик (кнопка: ${button})`;
+    addLog(`Клик по квадрату (${button})`, 'click');
+});
+
+clickArea.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    clickTypeMessage.textContent = `✅ Правый клик (контекстное меню заблокировано)`;
+    addLog('Правый клик по квадрату', 'warning');
+});
+
+clickArea.addEventListener('dblclick', () => {
+    clickTypeMessage.textContent = '✅ Двойной клик!';
+    addLog('Двойной клик по квадрату', 'click');
+});
+
+clickArea.addEventListener('mouseenter', () => {
+    clickArea.style.background = '#2ecc71';
+    addLog('Мышь вошла в зону', 'info');
+});
+
+clickArea.addEventListener('mouseleave', () => {
+    clickArea.style.background = '#4CAF50';
+    addLog('Мышь покинула зону', 'info');
+});
+
+// ============================================================
+// 4. КЛАВИАТУРА
+// ============================================================
+const keyDisplay = document.getElementById('keyDisplay');
+const lastKeySpan = document.getElementById('lastKey');
+const keyCaptureCheckbox = document.getElementById('keyCaptureCheckbox');
+
+function handleKeyDown(e) {
+    // Игнорируем ввод в полях, если не включён захват
+    if (e.target.tagName === 'INPUT' && !keyCaptureCheckbox.checked) return;
+
+    const mods = (e.shiftKey ? 'Shift+' : '') + (e.ctrlKey ? 'Ctrl+' : '') + (e.altKey ? 'Alt+' : '');
+    let keyName = e.key;
+    if (e.key === ' ') keyName = 'Пробел';
+    else if (e.key === 'Escape') keyName = 'Esc';
+    else if (e.key === 'Enter') keyName = 'Enter';
+    else if (e.key === 'Tab') keyName = 'Tab';
+    else if (e.key === 'Backspace') keyName = 'Backspace';
+    else if (e.key === 'ArrowUp') keyName = '↑';
+    else if (e.key === 'ArrowDown') keyName = '↓';
+    else if (e.key === 'ArrowLeft') keyName = '←';
+    else if (e.key === 'ArrowRight') keyName = '→';
+
+    const full = mods + keyName;
+    keyDisplay.textContent = `⌨️ Нажата: ${full}`;
+    lastKeySpan.textContent = full;
+    addLog(`Нажата: ${full} (код: ${e.code})`, 'info');
+}
+
+document.addEventListener('keydown', handleKeyDown);
+
+document.addEventListener('keyup', (e) => {
+    if (e.target.tagName === 'INPUT' && !keyCaptureCheckbox.checked) return;
+    addLog(`Отпущена: ${e.key}`, 'info');
+});
+
+keyCaptureCheckbox.addEventListener('change', function() {
+    if (this.checked) addLog('Захват клавиш во всех полях включён', 'warning');
+    else addLog('Захват клавиш в полях отключён', 'info');
+});
+
+// ============================================================
+// 5. TO-DO СПИСОК (делегирование)
+// ============================================================
+const taskList = document.getElementById('taskList');
+const taskInput = document.getElementById('taskInput');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const clearTasksBtn = document.getElementById('clearTasksBtn');
+
+function addTask(text) {
+    if (!text.trim()) {
+        addLog('Попытка добавить пустую задачу', 'error');
+        return;
+    }
+    const li = document.createElement('li');
+    li.innerHTML = `${text} <span class="delete-btn">×</span>`;
+    taskList.appendChild(li);
+    addLog(`Добавлена задача: "${text}"`, 'info');
+    taskInput.value = '';
+    taskInput.focus();
+}
+
+addTaskBtn.addEventListener('click', () => addTask(taskInput.value));
+
+taskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        addTask(taskInput.value);
+        e.preventDefault();
+    }
+});
+
+// ДЕЛЕГИРОВАНИЕ — один обработчик на весь список
+taskList.addEventListener('click', (e) => {
+    const target = e.target;
+
+    // Клик по крестику — удаление
+    if (target.classList.contains('delete-btn')) {
+        const li = target.parentElement;
+        const text = li.textContent.replace('×', '').trim();
+        li.remove();
+        addLog(`Удалена задача: "${text}"`, 'error');
+        return;
+    }
+
+    // Клик по самой задаче — переключение done
+    if (target.tagName === 'LI') {
+        target.classList.toggle('done');
+        const text = target.textContent.replace('×', '').trim();
+        const status = target.classList.contains('done') ? 'выполнена' : 'не выполнена';
+        addLog(`Задача "${text}" ${status}`, 'info');
+    }
+});
+
+clearTasksBtn.addEventListener('click', () => {
+    const count = taskList.querySelectorAll('li').length;
+    if (count === 0) {
+        addLog('Список уже пуст', 'warning');
+        return;
+    }
+    taskList.innerHTML = '';
+    addLog(`Все задачи удалены (${count} шт.)`, 'error');
+});
+
+// ============================================================
+// 6. ДЕЛЕГИРОВАНИЕ НА ДИНАМИЧЕСКИХ ЭЛЕМЕНТАХ
+// ============================================================
+const delegationList = document.getElementById('delegationList');
+const addDelegationBtn = document.getElementById('addDelegationItem');
+
+delegationList.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'LI') return;
+
+    delegationList.querySelectorAll('li').forEach(li => li.classList.remove('active'));
+    e.target.classList.add('active');
+    addLog(`Выбран: "${e.target.textContent}"`, 'click');
+});
+
+addDelegationBtn.addEventListener('click', () => {
+    const count = delegationList.querySelectorAll('li').length + 1;
+    const li = document.createElement('li');
+    li.textContent = `Элемент ${count}`;
+    delegationList.appendChild(li);
+    addLog(`Добавлен "Элемент ${count}"`, 'info');
+});
+
+// ============================================================
+// 7. TOGGLE
+// ============================================================
+const toggleSwitch = document.getElementById('toggleSwitch');
+const toggleStatus = document.getElementById('toggleStatus');
+let isActive = false;
+
+toggleSwitch.addEventListener('click', () => {
+    isActive = !isActive;
+    toggleSwitch.classList.toggle('active', isActive);
+    toggleStatus.textContent = isActive ? 'Включено' : 'Выключено';
+    toggleStatus.style.color = isActive ? '#2ecc71' : '#e74c3c';
+    addLog(`Переключатель ${isActive ? 'включён' : 'выключен'}`, 'click');
+});
+
+// ============================================================
+// 8. ОЧИСТКА ЛОГА
+// ============================================================
+document.getElementById('clearLogBtn').addEventListener('click', () => {
+    const log = document.getElementById('eventLog');
+    log.innerHTML = '<p style="color:#00ff41;">Лог очищен</p>';
+    addLog('Лог очищен пользователем', 'warning');
+});
+
+// Стартовое сообщение
+addLog('Система мониторинга событий активна', 'info');
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Инвентаризация склада</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        h1 { text-align: center; }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        button {
+            padding: 10px 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        button.green { background: #27ae60; }
+        button.green:hover { background: #229954; }
+        button.orange { background: #f39c12; }
+        button.purple { background: #9b59b6; }
+        input {
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+        #output {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            min-height: 100px;
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #dfe6e9;
+            padding: 10px;
+            text-align: left;
+        }
+        th { background: #34495e; color: white; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .premium { color: #e74c3c; font-weight: bold; }
+        .total { font-size: 24px; font-weight: bold; color: #27ae60; }
+        h3 { color: #2c3e50; margin-top: 0; }
+        ul { line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <h1>📦 Инвентаризация склада</h1>
+
+    <div class="toolbar">
+        <button onclick="showAll()">📋 Все товары</button>
+        <input type="text" id="searchInput" placeholder="Название..." value="ноутбук">
+        <button onclick="findByName()">🔍 Найти</button>
+        <button class="orange" onclick="showPremium()">💎 Премиум (&gt;500)</button>
+        <button class="green" onclick="showPriceList()">🏷 Прайс-лист</button>
+        <button class="purple" onclick="showTotal()">💰 Общая стоимость</button>
+    </div>
+
+    <div id="output">Нажми на любую кнопку...</div>
+
+    <script>
+        // ===== Исходные данные =====
+        const warehouse = [
+            { id: 1, name: "Ноутбук",    price: 1000, quantity: 4,  category: "tech" },
+            { id: 2, name: "Мышь",       price: 50,   quantity: 15, category: "tech" },
+            { id: 3, name: "Клавиатура", price: 80,   quantity: 10, category: "tech" },
+            { id: 4, name: "Стол",       price: 300,  quantity: 2,  category: "furniture" },
+            { id: 5, name: "Стул",       price: 150,  quantity: 8,  category: "furniture" },
+            { id: 6, name: "Лампа",      price: 40,   quantity: 20, category: "lighting" },
+            { id: 7, name: "Монитор",    price: 700,  quantity: 5,  category: "tech" }
+        ];
+
+        const output = document.getElementById('output');
+
+        // ===== Шаг 1: Все товары (forEach) =====
+        function showAll() {
+            let html = '<h3>📋 Все товары</h3>';
+            html += '<table><tr><th>ID</th><th>Название</th><th>Цена</th><th>Кол-во</th><th>Категория</th></tr>';
+            warehouse.forEach(item => {
+                html += `<tr>
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.price} ₽</td>
+                    <td>${item.quantity} шт.</td>
+                    <td>${item.category}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            output.innerHTML = html;
+        }
+
+        // ===== Шаг 2: Поиск (find) =====
+        function findByName() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            if (!query) {
+                output.innerHTML = '<p style="color:#e74c3c;">Введите название для поиска</p>';
+                return;
+            }
+
+            const found = warehouse.find(item => item.name.toLowerCase() === query);
+
+            if (found) {
+                output.innerHTML = `
+                    <h3>✅ Товар найден</h3>
+                    <p><strong>${found.name}</strong></p>
+                    <p>Цена: <strong>${found.price} ₽</strong></p>
+                    <p>В наличии: <strong>${found.quantity} шт.</strong></p>
+                    <p>Категория: <strong>${found.category}</strong></p>
+                `;
+            } else {
+                output.innerHTML = `<p style="color:#e74c3c;">❌ Товар "${query}" не найден</p>`;
+            }
+        }
+
+        // ===== Шаг 3: Премиум (filter) =====
+        function showPremium() {
+            const premium = warehouse.filter(item => item.price > 500);
+
+            if (premium.length === 0) {
+                output.innerHTML = '<p>Премиум-товаров нет.</p>';
+                return;
+            }
+
+            let html = '<h3>💎 Премиум-товары (цена &gt; 500 ₽)</h3>';
+            html += '<table><tr><th>Название</th><th>Цена</th></tr>';
+            premium.forEach(item => {
+                html += `<tr><td class="premium">${item.name}</td><td>${item.price} ₽</td></tr>`;
+            });
+            html += '</table>';
+            html += `<p>Найдено: <strong>${premium.length}</strong></p>`;
+            output.innerHTML = html;
+        }
+
+        // ===== Шаг 4: Прайс-лист (map) =====
+        function showPriceList() {
+            const priceList = warehouse.map(item => `${item.name} — ${item.price} ₽`);
+
+            let html = '<h3>🏷 Прайс-лист</h3><ul>';
+            priceList.forEach(line => {
+                html += `<li>${line}</li>`;
+            });
+            html += '</ul>';
+            output.innerHTML = html;
+        }
+
+        // ===== Шаг 5: Общая стоимость (reduce) =====
+        function showTotal() {
+            const total = warehouse.reduce(
+                (acc, item) => acc + item.price * item.quantity,
+                0
+            );
+
+            output.innerHTML = `
+                <h3>💰 Общая стоимость склада</h3>
+                <p class="total">${total.toLocaleString('ru-RU')} ₽</p>
+                <p style="color:#888;">Формула: сумма(цена × количество) по всем товарам</p>
+            `;
+        }
+
+        // ===== Самостоятельные задания =====
+
+        // Задание 1: цепочка — дорогая техника
+        function getExpensiveTechNames() {
+            return warehouse
+                .filter(item => item.category === 'tech')
+                .filter(item => item.price > 500)
+                .map(item => item.name);
+        }
+
+        // Задание 2: подсчёт по категориям
+        function countByCategory() {
+            return warehouse.reduce((acc, item) => {
+                acc[item.category] = (acc[item.category] || 0) + 1;
+                return acc;
+            }, {});
+        }
+
+        // Задание 3: some / every / findIndex
+        function runChecks() {
+            const hasExpensive = warehouse.some(item => item.price > 2000);
+            const allCheap = warehouse.every(item => item.price < 2000);
+            const chairIndex = warehouse.findIndex(item => item.name === 'Стул');
+
+            output.innerHTML = `
+                <h3>🧪 Проверки</h3>
+                <p>Есть ли товар дороже 2000? → <strong>${hasExpensive ? '✅ Да' : '❌ Нет'}</strong></p>
+                <p>Все ли товары дешевле 2000? → <strong>${allCheap ? '✅ Да' : '❌ Нет'}</strong></p>
+                <p>Индекс товара «Стул» → <strong>${chairIndex}</strong></p>
+
+                <hr style="margin:20px 0;">
+                <h3>📊 Дополнительно</h3>
+                <p>Дорогая техника (&gt;500): <strong>${getExpensiveTechNames().join(', ')}</strong></p>
+                <p>По категориям: <code>${JSON.stringify(countByCategory())}</code></p>
+            `;
+        }
+
+        // Добавим кнопку «Проверки» в тулбар
+        document.querySelector('.toolbar').insertAdjacentHTML('beforeend',
+            '<button class="green" onclick="runChecks()">🧪 Проверки</button>'
+        );
+
+        // Стартовый экран
+        showAll();
+    </script>
+</body>
+</html>

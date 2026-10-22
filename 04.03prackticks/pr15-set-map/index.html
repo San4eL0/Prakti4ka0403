@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Система тегов для блога</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        h1 { text-align: center; }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        button.green { background: #27ae60; }
+        button.green:hover { background: #229954; }
+        button.red { background: #e74c3c; }
+        button.orange { background: #f39c12; }
+        button.purple { background: #9b59b6; }
+
+        #currentTags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 40px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+        }
+        .empty { color: #aaa; font-style: italic; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #dfe6e9;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th { background: #34495e; color: white; }
+
+        #suggestions {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 5px;
+        }
+        #suggestions div {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        #suggestions div:hover { background: #f0f4f8; }
+
+        .counter {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏷 Система тегов для блога</h1>
+
+    <!-- Блок 1: Текущая статья -->
+    <div class="card">
+        <h2>Текущая статья <span class="counter" id="articleCounter">0</span></h2>
+        <p style="color:#888;font-size:14px;">Один и тот же тег нельзя добавить дважды. Регистр не важен.</p>
+
+        <div class="input-group">
+            <input type="text" id="tagInput" placeholder="Введите тег...">
+            <button onclick="addTag()">+ Добавить</button>
+        </div>
+        <div id="suggestions" style="display:none;"></div>
+
+        <div id="currentTags"></div>
+
+        <div style="margin-top:15px;">
+            <button class="green" onclick="saveArticle()">💾 Сохранить статью</button>
+            <button class="red" onclick="cancelArticle()">🗑 Отменить статью</button>
+        </div>
+    </div>
+
+    <!-- Блок 2: Глобальная статистика -->
+    <div class="card">
+        <h2>Глобальная статистика</h2>
+        <button onclick="showStats()">📊 Показать статистику</button>
+        <div id="statsOutput" style="margin-top:15px;"></div>
+    </div>
+
+    <!-- Блок 3: Все уникальные теги -->
+    <div class="card">
+        <h2>Все уникальные теги</h2>
+        <button onclick="showAllTags()">📋 Показать все теги</button>
+        <div id="allTagsOutput" style="margin-top:15px;"></div>
+    </div>
+
+    <!-- Блок 4: Дополнительно -->
+    <div class="card">
+        <h2>🧪 Дополнительно</h2>
+        <button class="purple" onclick="demoIntersection()">🔀 Пересечение тегов</button>
+        <button class="orange" onclick="demoWeakMap()">💾 WeakMap кэш</button>
+        <div id="extraOutput" style="margin-top:15px;"></div>
+    </div>
+
+    <script>
+        // ===== Структуры данных =====
+        let currentArticleTags = new Set();
+        const tagStats = new Map();
+        const allTagsEver = [];
+        let articleCount = 0;
+
+        // Для тестового пересечения
+        const sampleArticleA = new Set(['js', 'react', 'css']);
+        const sampleArticleB = new Set(['js', 'python', 'css']);
+
+        // ===== Рендер текущих тегов =====
+        function renderCurrentTags() {
+            const container = document.getElementById('currentTags');
+
+            if (currentArticleTags.size === 0) {
+                container.innerHTML = '<p class="empty">Теги не добавлены</p>';
+                return;
+            }
+
+            // Конвертация Set → Array через spread
+            const tagsArray = [...currentArticleTags];
+
+            container.innerHTML = tagsArray.map(tag => `
+                <span class="tag">
+                    ${tag}
+                    <button onclick="removeTag('${tag}')">×</button>
+                </span>
+            `).join('');
+
+            container.innerHTML += `<p style="width:100%;margin:10px 0 0;color:#888;font-size:13px;">
+                Всего тегов: ${currentArticleTags.size}
+            </p>`;
+        }
+
+        // ===== Добавление тега (Set) =====
+        function addTag() {
+            const input = document.getElementById('tagInput');
+            const rawTag = input.value.trim();
+
+            if (!rawTag) return;
+
+            // Приведение к нижнему регистру
+            const tag = rawTag.toLowerCase();
+
+            if (currentArticleTags.has(tag)) {
+                alert(`Тег "${tag}" уже добавлен к статье`);
+                return;
+            }
+
+            currentArticleTags.add(tag);
+            input.value = '';
+            document.getElementById('suggestions').style.display = 'none';
+            renderCurrentTags();
+        }
+
+        // ===== Удаление тега (Set) =====
+        function removeTag(tag) {
+            currentArticleTags.delete(tag);
+            renderCurrentTags();
+        }
+
+        // ===== Сохранение статьи (Set → Map) =====
+        function saveArticle() {
+            if (currentArticleTags.size === 0) {
+                alert('Добавьте хотя бы один тег!');
+                return;
+            }
+
+            articleCount++;
+            document.getElementById('articleCounter').textContent = articleCount;
+
+            currentArticleTags.forEach(tag => {
+                // Map: увеличиваем счётчик
+                if (tagStats.has(tag)) {
+                    tagStats.set(tag, tagStats.get(tag) + 1);
+                } else {
+                    tagStats.set(tag, 1);
+                }
+
+                // В массив — только если ещё нет
+                if (!allTagsEver.includes(tag)) {
+                    allTagsEver.push(tag);
+                }
+            });
+
+            currentArticleTags.clear();
+            renderCurrentTags();
+
+            alert(`✅ Статья #${articleCount} сохранена! Тегов: ${tagStats.size} уникальных.`);
+        }
+
+        // ===== Отмена статьи =====
+        function cancelArticle() {
+            if (currentArticleTags.size === 0) return;
+            if (!confirm('Отменить статью? Теги будут удалены без сохранения в статистику.')) return;
+
+            currentArticleTags.clear();
+            renderCurrentTags();
+        }
+
+        // ===== Статистика (Map) =====
+        function showStats() {
+            const output = document.getElementById('statsOutput');
+
+            if (tagStats.size === 0) {
+                output.innerHTML = '<p style="color:#888;">Нет данных. Сохраните хотя бы одну статью.</p>';
+                return;
+            }
+
+            // Сортировка по убыванию количества
+            const sorted = [...tagStats.entries()].sort((a, b) => b[1] - a[1]);
+
+            let html = '<table><tr><th>Тег</th><th>Статей</th></tr>';
+            sorted.forEach(([tag, count]) => {
+                html += `<tr><td>${tag}</td><td>${count}</td></tr>`;
+            });
+            html += '</table>';
+            html += `<p style="margin-top:10px;color:#888;">Уникальных тегов: <strong>${tagStats.size}</strong></p>`;
+
+            output.innerHTML = html;
+        }
+
+        // ===== Все теги =====
+        function showAllTags() {
+            const output = document.getElementById('allTagsOutput');
+
+            if (allTagsEver.length === 0) {
+                output.innerHTML = '<p style="color:#888;">Теги ещё не создавались.</p>';
+                return;
+            }
+
+            const sorted = [...allTagsEver].sort();
+
+            output.innerHTML = `
+                <p>Всего: <strong>${sorted.length}</strong></p>
+                <p>${sorted.map(t => `<span class="tag">${t}</span>`).join(' ')}</p>
+            `;
+        }
+
+        // ===== Пересечение (Set) =====
+        function demoIntersection() {
+            // Кросс-браузерный способ
+            const common = new Set(
+                [...sampleArticleA].filter(tag => sampleArticleB.has(tag))
+            );
+
+            document.getElementById('extraOutput').innerHTML = `
+                <h3>🔀 Пересечение тегов</h3>
+                <p>Статья A: <code>[${[...sampleArticleA].join(', ')}]</code></p>
+                <p>Статья B: <code>[${[...sampleArticleB].join(', ')}]</code></p>
+                <p>Общие теги: <strong>${[...common].join(', ')}</strong></p>
+                <p style="color:#888;font-size:13px;">Метод: фильтрация одного Set по наличию в другом.</p>
+            `;
+        }
+
+        // ===== WeakMap =====
+        function demoWeakMap() {
+            const articleCache = new WeakMap();
+
+            function createArticle(id, tags) {
+                return { id, tags: new Set(tags) };
+            }
+
+            function getTagCount(article) {
+                if (articleCache.has(article)) {
+                    return articleCache.get(article);
+                }
+                const count = article.tags.size;
+                articleCache.set(article, count);
+                return count;
+            }
+
+            const article1 = createArticle(1, ['js', 'react', 'css']);
+            const article2 = createArticle(2, ['js', 'node']);
+
+            document.getElementById('extraOutput').innerHTML = `
+                <h3>💾 WeakMap кэш</h3>
+                <p>Статья 1 (js, react, css): <strong>${getTagCount(article1)}</strong> тегов</p>
+                <p>Статья 2 (js, node): <strong>${getTagCount(article2)}</strong> тегов</p>
+                <p style="color:#888;font-size:13px;">
+                    WeakMap хранит кэш по объекту-ключу. Когда статья будет удалена, запись исчезнет автоматически.
+                </p>
+            `;
+        }
+
+        // ===== Автодополнение (фильтрация allTagsEver) =====
+        document.getElementById('tagInput').addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const suggestions = document.getElementById('suggestions');
+
+            if (!query) {
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            const matches = allTagsEver.filter(tag =>
+                tag.startsWith(query) && !currentArticleTags.has(tag)
+            );
+
+            if (matches.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            suggestions.style.display = 'block';
+            suggestions.innerHTML = matches.map(tag =>
+                `<div onclick="pickSuggestion('${tag}')">${tag}</div>`
+            ).join('');
+        });
+
+        function pickSuggestion(tag) {
+            document.getElementById('tagInput').value = tag;
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        // ===== Стартовый рендер =====
+        renderCurrentTags();
+
+        // Заполним примерами для наглядности
+        currentArticleTags.add('javascript');
+        currentArticleTags.add('react');
+        renderCurrentTags();
+    </script>
+</body>
+</html>

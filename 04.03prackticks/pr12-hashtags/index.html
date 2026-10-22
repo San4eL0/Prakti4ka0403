@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор хештегов</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f4f8;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+        button {
+            padding: 12px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 60px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            word-break: break-all;
+        }
+        .error { color: #e74c3c !important; }
+        .warning { color: #f39c12 !important; font-size: 14px; font-weight: normal; }
+        .success { color: #27ae60 !important; }
+        .hint {
+            font-size: 13px;
+            color: #888;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1># Генератор хештегов</h1>
+        <p class="hint">Введите фразу — получите хештег</p>
+
+        <div class="input-group">
+            <input type="text" id="inputPhrase" placeholder="Например: лучшие практики javascript" value="лучшие практики javascript">
+            <button id="generateBtn">Сгенерировать</button>
+        </div>
+
+        <div id="output">—</div>
+
+        <p class="hint">
+            Попробуй: <code>привет мир</code>, <code>в лесу родилась елочка</code>,
+            <code>и на и по с</code>, <code>очень длинная фраза для проверки ограничения</code>
+        </p>
+    </div>
+
+    <script>
+        // Список стоп-слов
+        const stopWords = ["в", "и", "на", "по", "с", "из", "от", "для", "не", "как"];
+
+        function generateHashtag(phrase) {
+            // Шаг 1: очистка и приведение к нижнему регистру
+            const cleaned = phrase.trim().toLowerCase();
+
+            // Шаг 2: разбивка на слова (фильтруем пустые)
+            const words = cleaned.split(' ').filter(w => w.length > 0);
+
+            // Шаг 3: фильтрация стоп-слов
+            const meaningful = words.filter(w => !stopWords.includes(w));
+
+            // Шаг 4: капитализация
+            const capitalized = meaningful.map(w =>
+                w.charAt(0).toUpperCase() + w.slice(1)
+            );
+
+            // Шаг 5: проверка и сборка
+            if (capitalized.length === 0) {
+                return { error: '❌ Невозможно создать хештег. Слишком короткая фраза' };
+            }
+
+            const hashtag = '#' + capitalized.join('');
+            const isTooLong = hashtag.length > 20;
+
+            return {
+                hashtag,
+                warning: isTooLong ? '⚠️ Хештег слишком длинный!' : null
+            };
+        }
+
+        function render() {
+            const input = document.getElementById('inputPhrase');
+            const output = document.getElementById('output');
+
+            const result = generateHashtag(input.value);
+
+            if (result.error) {
+                output.textContent = result.error;
+                output.className = 'error';
+                return;
+            }
+
+            let html = `<div class="success">${result.hashtag}</div>`;
+            if (result.warning) {
+                html += `<div class="warning">${result.warning} (длина: ${result.hashtag.length} символов)</div>`;
+            }
+            output.innerHTML = html;
+            output.className = '';
+        }
+
+        // Обработчики
+        document.getElementById('generateBtn').addEventListener('click', render);
+        document.getElementById('inputPhrase').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') render();
+        });
+
+        // Автозапуск
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Конструктор резюме</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background: #eef2f7;
+            color: #2c3e50;
+        }
+        h1 { text-align: center; }
+        fieldset {
+            border: 2px solid #3498db;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            background: white;
+        }
+        legend {
+            font-weight: bold;
+            color: #3498db;
+            padding: 0 10px;
+        }
+        label {
+            display: block;
+            margin: 8px 0 4px;
+            font-size: 14px;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            transition: 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        button.green { background: #27ae60; }
+        button.red { background: #e74c3c; }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        #skillsList {
+            list-style: none;
+            padding: 0;
+        }
+        #skillsList li {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin: 4px;
+            font-size: 14px;
+        }
+        #skillsList li button {
+            background: none;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0 4px;
+            font-size: 16px;
+        }
+        #output {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+        #output h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
+        #output p { margin: 6px 0; }
+        #output h3 { margin-top: 20px; color: #2980b9; }
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📄 Конструктор резюме</h1>
+
+    <fieldset>
+        <legend>👤 Личная информация</legend>
+        <div class="row">
+            <div>
+                <label>Имя</label>
+                <input id="firstName" value="Иван">
+            </div>
+            <div>
+                <label>Фамилия</label>
+                <input id="lastName" value="Иванов">
+            </div>
+            <div>
+                <label>Возраст</label>
+                <input id="age" type="number" value="30">
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>🏠 Адрес</legend>
+        <div class="row">
+            <div><label>Город</label><input id="city" value="Москва"></div>
+            <div><label>Улица</label><input id="street" value="Ленина"></div>
+        </div>
+        <div class="row">
+            <div><label>Дом</label><input id="building" value="15"></div>
+            <div><label>Индекс</label><input id="zip" value="123456"></div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>🛠 Навыки</legend>
+        <div class="row">
+            <div style="flex: 3;">
+                <input id="skillInput" placeholder="Например: JavaScript">
+            </div>
+            <div style="flex: 1;">
+                <button class="green" onclick="addSkill()">+ Добавить</button>
+            </div>
+        </div>
+        <ul id="skillsList"></ul>
+    </fieldset>
+
+    <fieldset>
+        <legend>💼 Опыт работы</legend>
+        <div class="row">
+            <div><label>Компания</label><input id="expCompany" value="Яндекс"></div>
+            <div><label>Должность</label><input id="expPosition" value="Разработчик"></div>
+            <div><label>Лет</label><input id="expYears" type="number" value="3"></div>
+        </div>
+        <button class="green" onclick="addExperience()">+ Добавить опыт</button>
+        <ul id="experienceList" style="list-style:none;padding:0;margin-top:10px;"></ul>
+    </fieldset>
+
+    <fieldset>
+        <legend>📞 Контакты</legend>
+        <div class="row">
+            <div><label>Email</label><input id="email" type="email" value="ivan@example.com"></div>
+            <div><label>Телефон</label><input id="phone" type="tel" value="+7-999-123-45-67"></div>
+        </div>
+    </fieldset>
+
+    <div>
+        <button onclick="buildAndDisplay()">📝 Собрать и показать</button>
+        <button class="green" onclick="saveResume()">💾 Сохранить в localStorage</button>
+        <button onclick="loadResume()">📂 Загрузить последнее</button>
+        <button class="red" onclick="clearForm()">🗑 Очистить</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        // ===== Хранилище динамических данных =====
+        let skills = [];
+        let experienceList = [];
+
+        // ===== Добавление навыка =====
+        function addSkill() {
+            const input = document.getElementById('skillInput');
+            const value = input.value.trim();
+
+            if (!value) return;
+            if (skills.includes(value)) {
+                alert('Такой навык уже добавлен!');
+                return;
+            }
+
+            skills.push(value);
+            input.value = '';
+            renderSkills();
+        }
+
+        function renderSkills() {
+            const list = document.getElementById('skillsList');
+            list.innerHTML = skills.map(skill => `
+                <li>${skill} <button onclick="removeSkill('${skill}')">×</button></li>
+            `).join('');
+        }
+
+        function removeSkill(skill) {
+            skills = skills.filter(s => s !== skill);
+            renderSkills();
+        }
+
+        // ===== Добавление опыта =====
+        function addExperience() {
+            const company = document.getElementById('expCompany').value.trim();
+            const position = document.getElementById('expPosition').value.trim();
+            const years = Number(document.getElementById('expYears').value) || 0;
+
+            if (!company || !position) {
+                alert('Заполните компанию и должность');
+                return;
+            }
+
+            // Сокращённый синтаксис свойств
+            const job = { company, position, years };
+            experienceList = [...experienceList, job];
+            renderExperience();
+        }
+
+        function renderExperience() {
+            const list = document.getElementById('experienceList');
+            list.innerHTML = experienceList.map(job => `
+                <li>💼 ${job.position} в ${job.company} (${job.years} лет)</li>
+            `).join('');
+        }
+
+        // ===== Сборка объекта резюме (spread) =====
+        function buildResume() {
+            const personalInfo = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                age: Number(document.getElementById('age').value) || 0
+            };
+
+            const address = {
+                city: document.getElementById('city').value.trim(),
+                street: document.getElementById('street').value.trim(),
+                building: document.getElementById('building').value.trim(),
+                zip: document.getElementById('zip').value.trim()
+            };
+
+            // Сокращённый синтаксис
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const contacts = { email, phone };
+
+            // Композиция через spread
+            return {
+                ...personalInfo,
+                address: { ...address },
+                skills: [...skills],
+                experience: [...experienceList],
+                contacts: { ...contacts }
+            };
+        }
+
+        // ===== Отображение с деструктуризацией =====
+        function displayResume(resume) {
+            const {
+                firstName = 'Неизвестный',
+                lastName = 'Пользователь',
+                age = 'не указан',
+                address: { city = '', street = '', building = '' } = {},
+                skills = [],
+                experience = [],
+                contacts: { email = 'не указан', phone = 'не указан' } = {}
+            } = resume;
+
+            const fullName = `${firstName} ${lastName}`;
+            const addressString = [city, street, building].filter(Boolean).join(', ') || 'не указан';
+            const skillsString = skills.length > 0 ? skills.join(', ') : 'не указаны';
+
+            let html = `
+                <h2>Резюме: ${fullName}</h2>
+                <p><strong>Возраст:</strong> ${age}</p>
+                <p><strong>Адрес:</strong> ${addressString}</p>
+                <p><strong>Навыки:</strong> ${skillsString}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Телефон:</strong> ${phone}</p>
+            `;
+
+            if (experience.length > 0) {
+                html += '<h3>Опыт работы</h3><ul>';
+                experience.forEach(job => {
+                    html += `<li>${job.position} в ${job.company} (${job.years} лет)</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // Покажем сам объект для наглядности
+            html += '<h3>Объект резюме (для отладки)</h3>';
+            html += `<pre>${JSON.stringify(resume, null, 2)}</pre>`;
+
+            document.getElementById('output').innerHTML = html;
+        }
+
+        function buildAndDisplay() {
+            const resume = buildResume();
+            displayResume(resume);
+        }
+
+        // ===== LocalStorage =====
+        function saveResume() {
+            const resume = buildResume();
+            localStorage.setItem('savedResume', JSON.stringify(resume));
+            alert('✅ Резюме сохранено!');
+        }
+
+        function loadResume() {
+            const saved = localStorage.getItem('savedResume');
+            if (!saved) {
+                alert('Нет сохранённого резюме');
+                return;
+            }
+            const resume = JSON.parse(saved);
+
+            // Восстанавливаем поля
+            document.getElementById('firstName').value = resume.firstName || '';
+            document.getElementById('lastName').value = resume.lastName || '';
+            document.getElementById('age').value = resume.age || '';
+            document.getElementById('city').value = resume.address?.city || '';
+            document.getElementById('street').value = resume.address?.street || '';
+            document.getElementById('building').value = resume.address?.building || '';
+            document.getElementById('zip').value = resume.address?.zip || '';
+            document.getElementById('email').value = resume.contacts?.email || '';
+            document.getElementById('phone').value = resume.contacts?.phone || '';
+
+            skills = resume.skills || [];
+            experienceList = resume.experience || [];
+            renderSkills();
+            renderExperience();
+
+            displayResume(resume);
+        }
+
+        // ===== Очистка =====
+        function clearForm() {
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            skills = [];
+            experienceList = [];
+            renderSkills();
+            renderExperience();
+            document.getElementById('output').innerHTML = '';
+        }
+
+        // Стартовый рендер
+        addSkill();
+        document.getElementById('skillInput').value = 'JavaScript';
+        addSkill();
+        document.getElementById('skillInput').value = 'React';
+        addSkill();
+        addExperience();
+        buildAndDisplay();
+    </script>
+</body>
+</html>
