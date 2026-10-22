@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ПР21 — Демо-виджет Госуслуг</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container { max-width: 750px; width: 100%; }
+        h1 { text-align: center; color: #1a1a2e; font-weight: 600; font-size: 28px; margin-bottom: 4px; }
+        .subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 24px; }
+
+        /* ===== Виджет ===== */
+        .widget-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid #e9ecef;
+        }
+        .widget-header {
+            background: #0047ab;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .widget-title { color: white; font-weight: 600; font-size: 16px; }
+        .widget-status {
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+        .widget-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 200px;
+        }
+        @media (max-width: 600px) {
+            .widget-content { grid-template-columns: 1fr; }
+        }
+        .service-list h3 {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .service-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
+        }
+        .service-item:hover { background: #f5f7fa; transform: translateX(4px); }
+        .service-item.active { background: #e8edf9; border-color: #0047ab; }
+        .service-icon { font-size: 20px; margin-right: 12px; }
+        .service-name { flex: 1; font-size: 14px; color: #1a1a2e; }
+        .service-status {
+            font-size: 11px;
+            color: #4CAF50;
+            background: #e8f5e9;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .service-detail {
+            background: #f8f9fc;
+            border-radius: 10px;
+            padding: 16px;
+            min-height: 140px;
+        }
+        .service-detail .hint { color: #999; font-size: 14px; text-align: center; }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .label { color: #666; }
+        .detail-row .value { font-weight: 600; color: #1a1a2e; }
+
+        .widget-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e9eef5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-refresh {
+            background: none;
+            border: none;
+            color: #0047ab;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+        .btn-refresh:hover { background: #e8edf9; }
+        .widget-info { font-size: 12px; color: #999; }
+
+        /* ===== Авторизация ===== */
+        .auth-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            border: 1px solid #e9ecef;
+        }
+        .auth-section h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 12px; }
+        .auth-form { display: flex; gap: 10px; flex-wrap: wrap; }
+        .auth-form input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 14px;
+            border: 2px solid #e9eef5;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .auth-form input:focus { outline: none; border-color: #0047ab; }
+        .auth-form button {
+            padding: 10px 24px;
+            background: #0047ab;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .auth-form button:hover { background: #003380; }
+        .auth-status { margin-top: 10px; font-size: 13px; color: #666; }
+        .auth-status.success { color: #4CAF50; }
+        .auth-status.error { color: #dc3545; }
+
+        /* ===== API ===== */
+        .api-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+        .api-section h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 12px; }
+        .api-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .api-btn {
+            padding: 8px 18px;
+            background: #f5f7fa;
+            border: 1px solid #dde1e6;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .api-btn:hover { background: #e8edf9; border-color: #0047ab; }
+        .api-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .api-response {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .api-response pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+        .api-response.success { color: #4CAF50; }
+        .api-response.error { color: #ff6b6b; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏛 Демо-виджет Госуслуг</h1>
+    <p class="subtitle">Имитация работы с API государственных услуг</p>
+
+    <!-- Виджет -->
+    <div class="widget-container" id="widget-container">
+        <div class="widget-header">
+            <span class="widget-title">🏛 Госуслуги</span>
+            <span class="widget-status" id="widget-status">● Подключено</span>
+        </div>
+        <div class="widget-content" id="widget-content">
+            <div class="service-list">
+                <h3>Доступные услуги</h3>
+                <div class="service-item" data-service="passport">
+                    <span class="service-icon">🛂</span>
+                    <span class="service-name">Загранпаспорт</span>
+                    <span class="service-status">доступно</span>
+                </div>
+                <div class="service-item" data-service="tax">
+                    <span class="service-icon">💰</span>
+                    <span class="service-name">Налоговая задолженность</span>
+                    <span class="service-status">доступно</span>
+                </div>
+                <div class="service-item" data-service="fines">
+                    <span class="service-icon">🚔</span>
+                    <span class="service-name">Штрафы ГИБДД</span>
+                    <span class="service-status">доступно</span>
+                </div>
+                <div class="service-item" data-service="pfr">
+                    <span class="service-icon">👴</span>
+                    <span class="service-name">Пенсионные накопления</span>
+                    <span class="service-status">доступно</span>
+                </div>
+                <div class="service-item" data-service="doctor">
+                    <span class="service-icon">🏥</span>
+                    <span class="service-name">Запись к врачу</span>
+                    <span class="service-status">новое</span>
+                </div>
+            </div>
+            <div class="service-detail" id="service-detail">
+                <p class="hint">Выберите услугу для получения информации</p>
+            </div>
+        </div>
+        <div class="widget-footer">
+            <button class="btn-refresh" id="refresh-btn">🔄 Обновить данные</button>
+            <span class="widget-info">Версия API: 2.0</span>
+        </div>
+    </div>
+
+    <!-- Авторизация -->
+    <div class="auth-section">
+        <h3>🔐 Авторизация через ЕСИА</h3>
+        <div class="auth-form">
+            <input type="text" id="auth-login" placeholder="Логин (телефон или email)" value="user123">
+            <input type="password" id="auth-password" placeholder="Пароль" value="password">
+            <button id="auth-btn">Войти через Госуслуги</button>
+        </div>
+        <div class="auth-status" id="auth-status">Статус: не авторизован</div>
+    </div>
+
+    <!-- API-запросы -->
+    <div class="api-section">
+        <h3>🔌 API-запросы</h3>
+        <div class="api-controls">
+            <button class="api-btn" data-api="user">Получить данные пользователя</button>
+            <button class="api-btn" data-api="services">Список услуг</button>
+            <button class="api-btn" data-api="history">История обращений</button>
+            <button class="api-btn" data-api="profile">Личный кабинет</button>
+        </div>
+        <div class="api-response" id="api-response">
+            <pre>Результат запроса будет здесь...</pre>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// 1. ЭМУЛЯЦИЯ БАЗ ДАННЫХ
+// ============================================================
+const userDB = {
+    'user123': {
+        id: 'user123',
+        name: 'Иван Иванов',
+        phone: '+7 999 999-99-99',
+        email: 'ivan@example.com',
+        snils: '123-456-789 00',
+        passport: '45 12 345678',
+        registered: 'г. Москва, ул. Тверская, д. 10, кв. 5'
+    }
+};
+
+const servicesDB = {
+    passport: {
+        name: 'Загранпаспорт',
+        description: 'Оформление заграничного паспорта нового поколения',
+        status: 'доступно',
+        price: '5000 ₽',
+        terms: 'до 30 дней'
+    },
+    tax: {
+        name: 'Налоговая задолженность',
+        description: 'Проверка и оплата налоговой задолженности',
+        status: 'доступно',
+        debt: '0 ₽',
+        last_payment: '15.01.2025'
+    },
+    fines: {
+        name: 'Штрафы ГИБДД',
+        description: 'Проверка и оплата штрафов за нарушение ПДД',
+        status: 'доступно',
+        count: 0,
+        total: '0 ₽'
+    },
+    pfr: {
+        name: 'Пенсионные накопления',
+        description: 'Информация о состоянии индивидуального лицевого счёта',
+        status: 'доступно',
+        balance: '1 245 678.90 ₽',
+        contributions: '2 100 000 ₽'
+    },
+    // Задание 1: новая услуга
+    doctor: {
+        name: 'Запись к врачу',
+        description: 'Запись на приём к врачу через электронную регистратуру',
+        status: 'доступно',
+        clinics: 'Поликлиника №1, Поликлиника №2',
+        free_slots: 15
+    }
+};
+
+const historyDB = [
+    { id: 1, service: 'Загранпаспорт', date: '2025-02-10', status: 'завершено' },
+    { id: 2, service: 'Налоговая задолженность', date: '2025-01-15', status: 'завершено' },
+    { id: 3, service: 'Штрафы ГИБДД', date: '2024-12-20', status: 'в обработке' }
+];
+
+// ============================================================
+// 2. СОСТОЯНИЯ
+// ============================================================
+let isAuthenticated = false;
+let currentUser = null;
+let activeService = null;
+
+// ============================================================
+// 3. ЭЛЕМЕНТЫ
+// ============================================================
+const authLogin = document.getElementById('auth-login');
+const authPassword = document.getElementById('auth-password');
+const authBtn = document.getElementById('auth-btn');
+const authStatus = document.getElementById('auth-status');
+const widgetStatus = document.getElementById('widget-status');
+const serviceDetail = document.getElementById('service-detail');
+const refreshBtn = document.getElementById('refresh-btn');
+const apiResponse = document.getElementById('api-response');
+
+// ============================================================
+// 4. СИМУЛЯЦИЯ API
+// ============================================================
+function gosuslugiAPI(endpoint, params = {}) {
+    return new Promise((resolve, reject) => {
+        const delay = 300 + Math.random() * 700;
+
+        setTimeout(() => {
+            // Проверка авторизации (кроме auth)
+            if (!isAuthenticated && endpoint !== 'auth') {
+                reject({
+                    error: 'unauthorized',
+                    message: 'Необходима авторизация через ЕСИА'
+                });
+                return;
+            }
+
+            switch (endpoint) {
+                case 'auth':
+                    if (params.login && params.password) {
+                        // Простая проверка: любой логин + пароль 'password'
+                        if (params.password === 'password' || params.password === 'password123') {
+                            resolve({ success: true, user: userDB['user123'] });
+                        } else {
+                            reject({ error: 'invalid_credentials', message: 'Неверный логин или пароль' });
+                        }
+                    } else {
+                        reject({ error: 'invalid_credentials', message: 'Введите логин и пароль' });
+                    }
+                    break;
+
+                case 'user':
+                    resolve({ success: true, data: currentUser || userDB['user123'] });
+                    break;
+
+                case 'services':
+                    resolve({ success: true, data: Object.values(servicesDB) });
+                    break;
+
+                case 'service':
+                    if (params.id && servicesDB[params.id]) {
+                        resolve({ success: true, data: servicesDB[params.id] });
+                    } else {
+                        reject({ error: 'not_found', message: 'Услуга не найдена' });
+                    }
+                    break;
+
+                case 'history':
+                    resolve({ success: true, data: historyDB });
+                    break;
+
+                case 'profile':
+                    // Задание 5: личный кабинет
+                    resolve({
+                        success: true,
+                        data: {
+                            user: currentUser,
+                            applicationsCount: historyDB.length,
+                            favorites: ['Загранпаспорт', 'Штрафы ГИБДД']
+                        }
+                    });
+                    break;
+
+                default:
+                    reject({ error: 'not_found', message: `Эндпоинт ${endpoint} не найден` });
+            }
+        }, delay);
+    });
+}
+
+// ============================================================
+// 5. ОТОБРАЖЕНИЕ API-ОТВЕТА
+// ============================================================
+function showAPIResponse(data, isError = false) {
+    apiResponse.className = 'api-response ' + (isError ? 'error' : 'success');
+    const content = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    apiResponse.innerHTML = `<pre>${content}</pre>`;
+}
+
+// ============================================================
+// 6. ОБНОВЛЕНИЕ СТАТУСА АВТОРИЗАЦИИ
+// ============================================================
+function updateAuthStatus() {
+    if (isAuthenticated && currentUser) {
+        authStatus.innerHTML = `
+            Авторизован как <strong>${currentUser.name}</strong>
+            <span style="color:#666;font-size:12px;">${currentUser.email}</span>
+        `;
+        authStatus.className = 'auth-status success';
+        authBtn.textContent = 'Выйти из Госуслуг';
+        authBtn.style.background = '#dc3545';
+        widgetStatus.textContent = '✅ Авторизован';
+        widgetStatus.style.background = 'rgba(76, 175, 80, 0.3)';
+    } else {
+        authStatus.innerHTML = 'Статус: не авторизован';
+        authStatus.className = 'auth-status';
+        authBtn.textContent = 'Войти через Госуслуги';
+        authBtn.style.background = '#0047ab';
+        widgetStatus.textContent = '⚠ Требуется вход';
+        widgetStatus.style.background = 'rgba(255, 193, 7, 0.3)';
+        currentUser = null;
+        activeService = null;
+    }
+}
+
+// ============================================================
+// 7. ДЕТАЛИ УСЛУГИ (с историей)
+// ============================================================
+const fieldLabels = {
+    price: '💰 Стоимость',
+    terms: '📅 Срок',
+    debt: '💸 Задолженность',
+    last_payment: '📆 Последний платёж',
+    count: '📊 Количество',
+    total: '💰 Итого',
+    balance: '💼 Баланс',
+    contributions: '📈 Взносы',
+    clinics: '🏥 Поликлиники',
+    free_slots: '✅ Свободных мест'
+};
+
+function showServiceDetail(serviceId) {
+    const service = servicesDB[serviceId];
+    if (!service) return;
+
+    activeService = serviceId;
+
+    document.querySelectorAll('.service-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.service === serviceId);
+    });
+
+    let html = '<div class="result">';
+    html += `<h4 style="margin:0 0 8px 0;color:#1a1a2e;">${service.name}</h4>`;
+    html += `<p style="color:#666;font-size:13px;margin-bottom:10px;">${service.description}</p>`;
+
+    for (const [key, value] of Object.entries(service)) {
+        if (key === 'name' || key === 'description' || key === 'status') continue;
+        html += `
+            <div class="detail-row">
+                <span class="label">${fieldLabels[key] || key}</span>
+                <span class="value">${value}</span>
+            </div>
+        `;
+    }
+
+    // Задание 2: показать статус заявки из истории
+    const relatedApp = historyDB.find(h => h.service === service.name);
+    if (relatedApp) {
+        html += `
+            <div class="detail-row" style="margin-top:8px;padding-top:8px;border-top:2px solid #e9ecef;">
+                <span class="label">📋 Заявка</span>
+                <span class="value">${relatedApp.status} (${relatedApp.date})</span>
+            </div>
+        `;
+    }
+
+    // Задание 3: кнопка «Подать заявление»
+    html += `
+        <button onclick="submitApplication('${serviceId}')"
+                style="margin-top:12px;width:100%;padding:10px;background:#0047ab;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+            📝 Подать заявление
+        </button>
+    `;
+
+    html += '</div>';
+    serviceDetail.innerHTML = html;
+}
+
+// ============================================================
+// 8. ПОДАЧА ЗАЯВЛЕНИЯ (Задание 3)
+// ============================================================
+function submitApplication(serviceId) {
+    if (!isAuthenticated) {
+        alert('Необходимо авторизоваться через ЕСИА!');
+        return;
+    }
+
+    const service = servicesDB[serviceId];
+    const newApp = {
+        id: Date.now(),
+        service: service.name,
+        date: new Date().toLocaleDateString('ru-RU'),
+        status: 'подано'
+    };
+
+    historyDB.unshift(newApp);
+
+    showAPIResponse({
+        success: true,
+        message: 'Заявление подано!',
+        application: newApp
+    });
+
+    // Обновляем детали
+    showServiceDetail(serviceId);
+}
+
+// ============================================================
+// 9. ОБРАБОТЧИК АВТОРИЗАЦИИ
+// ============================================================
+authBtn.addEventListener('click', async function() {
+    // Если уже авторизован — выходим
+    if (isAuthenticated) {
+        isAuthenticated = false;
+        updateAuthStatus();
+        showAPIResponse('Вы вышли из Госуслуг');
+        return;
+    }
+
+    const login = authLogin.value.trim();
+    const password = authPassword.value.trim();
+
+    if (!login || !password) {
+        showAPIResponse('Введите логин и пароль', true);
+        return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Загрузка...';
+
+    try {
+        const response = await gosuslugiAPI('auth', { login, password });
+        if (response.success) {
+            isAuthenticated = true;
+            currentUser = response.user;
+            updateAuthStatus();
+            showAPIResponse('✅ Авторизация успешна!\nДобро пожаловать, ' + currentUser.name);
+
+            // Загружаем услуги
+            const servicesRes = await gosuslugiAPI('services');
+            console.log('Услуги загружены:', servicesRes.data);
+        }
+    } catch (error) {
+        showAPIResponse(error.message || 'Ошибка авторизации', true);
+    } finally {
+        this.disabled = false;
+        this.textContent = isAuthenticated ? 'Выйти из Госуслуг' : 'Войти через Госуслуги';
+    }
+});
+
+// ============================================================
+// 10. КЛИК ПО УСЛУГЕ
+// ============================================================
+document.querySelectorAll('.service-item').forEach(el => {
+    el.addEventListener('click', function() {
+        if (!isAuthenticated) {
+            alert('Для просмотра услуг необходимо авторизоваться через ЕСИА!');
+            return;
+        }
+        showServiceDetail(this.dataset.service);
+    });
+});
+
+// ============================================================
+// 11. ОБНОВЛЕНИЕ ДАННЫХ
+// ============================================================
+refreshBtn.addEventListener('click', async function() {
+    if (!isAuthenticated) {
+        alert('Необходимо авторизоваться');
+        return;
+    }
+
+    this.textContent = '🔄 Обновление...';
+    this.disabled = true;
+
+    try {
+        const response = await gosuslugiAPI('services');
+        showAPIResponse('✅ Данные обновлены.\n' + JSON.stringify(response.data, null, 2));
+
+        widgetStatus.textContent = '🔄 Синхронизировано';
+        setTimeout(() => {
+            widgetStatus.textContent = isAuthenticated ? '✅ Авторизован' : '⚠ Требуется вход';
+        }, 2000);
+    } catch (error) {
+        showAPIResponse(error.message || 'Ошибка обновления', true);
+    } finally {
+        this.textContent = '🔄 Обновить данные';
+        this.disabled = false;
+    }
+});
+
+// ============================================================
+// 12. API-КНОПКИ
+// ============================================================
+document.querySelectorAll('.api-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        if (!isAuthenticated) {
+            alert('Для выполнения запросов необходимо авторизоваться через ЕСИА!');
+            return;
+        }
+
+        const apiName = this.dataset.api;
+        const originalText = this.textContent;
+        this.disabled = true;
+        this.textContent = '⏳ Загрузка...';
+
+        try {
+            const response = await gosuslugiAPI(apiName);
+            showAPIResponse(response.data);
+        } catch (error) {
+            showAPIResponse(error.message || 'Ошибка запроса', true);
+        } finally {
+            this.disabled = false;
+            this.textContent = originalText;
+        }
+    });
+});
+
+// ============================================================
+// 13. ENTER В ПОЛЯХ ВВОДА
+// ============================================================
+[authLogin, authPassword].forEach(input => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') authBtn.click();
+    });
+});
+
+// ============================================================
+// 14. ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+updateAuthStatus();
+console.log('✅ ПР21: Демо-виджет Госуслуг загружен');
+console.log('Тестовые данные: логин user123, пароль password');
+</script>
+</body>
+</html>
